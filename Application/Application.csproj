@@ -6,4 +6,19 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="ViewModel And Dto\Dto\AdminSide\" />
+    <Folder Include="ViewModel And Dto\ViewModels\AdminSide\" />
+    <Folder Include="ViewModel And Dto\ViewModels\UserSide\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Doamin\Doamin.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -4,7 +4,7 @@ using Doamin.Entities.Chats;
 using Doamin.Entities.UserEntities;
 using Microsoft.EntityFrameworkCore;
 
-namespace InfruStructure.ChatDbContext;
+namespace InfruStructure.WebChatDbContext;
 
 public class ChatDbContext : DbContext
 {
