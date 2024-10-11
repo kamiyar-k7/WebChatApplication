@@ -1,6 +1,2 @@
 @WebChatApi_HostAddress = http://localhost:5183
 
-GET {{WebChatApi_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

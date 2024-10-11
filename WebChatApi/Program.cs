@@ -1,11 +1,33 @@
+using InfruStructure.ChatDbContext;
+using Microsoft.EntityFrameworkCore;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
+#region DbContext
+
+builder.Services.AddDbContext<ChatDbContext>(options => options.UseSqlServer
+(builder.Configuration.GetConnectionString("ChatConecttionString")));
+
+#endregion
+
+#region Serilog
+
+builder.Host.UseSerilog((context, conf) => conf.WriteTo.Console().ReadFrom.Configuration(context.Configuration));
+
+#endregion
+
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
+
+
+
 
 var app = builder.Build();
 

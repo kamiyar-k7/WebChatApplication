@@ -15,15 +15,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3Infrustructure", "3Infrust
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4Api", "4Api", "{89E6FB16-2821-46BC-A202-4F8AB9AB8A82}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebChatBlazor", "WebChatBlazor\WebChatBlazor.csproj", "{36366EC5-9C61-4EA4-9FDA-DA80F57DA132}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebChatBlazor", "WebChatBlazor\WebChatBlazor.csproj", "{36366EC5-9C61-4EA4-9FDA-DA80F57DA132}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doamin", "Doamin\Doamin.csproj", "{3E7D330D-CCEC-40A8-B0C9-7ECA88A13093}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Doamin", "Doamin\Doamin.csproj", "{3E7D330D-CCEC-40A8-B0C9-7ECA88A13093}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{F31A8A9A-95EE-4825-B016-614328631910}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "Application\Application.csproj", "{F31A8A9A-95EE-4825-B016-614328631910}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InfruStructure", "InfruStructure\InfruStructure.csproj", "{CEF61C27-9820-41DF-A292-F8087D2C8817}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InfruStructure", "InfruStructure\InfruStructure.csproj", "{CEF61C27-9820-41DF-A292-F8087D2C8817}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebChatApi", "WebChatApi\WebChatApi.csproj", "{39ED1A1F-1E3F-47F8-8119-71279D653FCE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebChatApi", "WebChatApi\WebChatApi.csproj", "{39ED1A1F-1E3F-47F8-8119-71279D653FCE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
