@@ -7,8 +7,11 @@ using Doamin.IRepository.UserPart;
 using FluentValidation;
 using InfruStructure.Repository.UserPart;
 using InfruStructure.WebChatDbContext;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,12 +46,36 @@ builder.Services.AddScoped<IUserServices, UserServices>();
 #endregion
 
 #region Validator
-builder.Services.AddScoped<IValidator<UserDto>, UserDtoValidator>();
+builder.Services.AddScoped<IValidator<object>, UserDtoValidator>();
+
 
 
 #endregion
 
 
+#region JWT
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(option =>
+{
+    option.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        ValidateIssuer = true ,
+        ValidateLifetime = true,
+        ValidateAudience = true,
+        ClockSkew = TimeSpan.Zero,
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        ValidAudience = builder.Configuration["JwtSettings:Audiece"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
+    };
+
+});
+
+#endregion
 
 
 
@@ -73,6 +100,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

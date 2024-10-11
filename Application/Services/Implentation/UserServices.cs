@@ -6,22 +6,32 @@ using AutoMapper;
 using Doamin.Entities.UserEntities;
 using Doamin.IRepository.UserPart;
 using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 
 namespace Application.Services.Implentation;
 
 public class UserServices : IUserServices
 {
+    private readonly IConfiguration _configuration;
     private readonly IMapper _mapper;
-    private readonly IValidator<UserDto> _validator;
+    private readonly IValidator<object> _validator;
+
     private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
     #region Ctor
-    public UserServices(IMapper mapper,
-        IValidator<UserDto> validator,
+    public UserServices(IConfiguration configuration,
+        IMapper mapper,
+        IValidator<object> validator,
         IUserRepository userRepository,
         IRoleRepository roleRepository)
     {
+        _configuration = configuration;
         _mapper = mapper;
         _validator = validator;
         _userRepository = userRepository;
@@ -31,7 +41,7 @@ public class UserServices : IUserServices
     #endregion
 
 
-    public async Task AddUser(UserDto userDto)
+    public async Task SignUp(UserSignUpDto userDto)
     {
         var res = await _validator.ValidateAsync(userDto);
         if (!res.IsValid)
@@ -47,11 +57,15 @@ public class UserServices : IUserServices
 
             throw new Exception(serializederrors);
         }
-
+        var exist = await _userRepository.IsExist(userDto.UserEmail);
+        if (exist)
+        {
+            throw new Exception("The User IS Already Exist");
+        }
 
         var role = await _roleRepository.GetRoleName(StaticRoleNames.User);
 
-        var user = _mapper.Map<User>(userDto);
+        var user = _mapper.Map<User>(userDto); // encode password later
         user.RoleName = role.RoleName;
 
         UserSelectedRole userSelectedRole = new UserSelectedRole()
@@ -70,6 +84,72 @@ public class UserServices : IUserServices
 
     }
 
+    public async Task<string> SignIn(UserSignInDto userDto)
+    {
 
+        #region Validation
+
+        var res = await _validator.ValidateAsync(userDto);
+        if (!res.IsValid)
+        {
+            var errorgroups = res.Errors.GroupBy(x => x.PropertyName).ToList();
+            List<ValidationDto> Errors = errorgroups.Select(x => new ValidationDto
+            {
+                propertyname = x.Key,
+                errors = x.Select(x => x.ErrorMessage).ToList()
+            }).ToList();
+
+            var serializederrors = JsonSerializer.Serialize(Errors, options: new JsonSerializerOptions { WriteIndented = true });
+
+            throw new Exception(serializederrors);
+        }
+
+        #endregion
+
+
+        var user = await  _userRepository.SignIn(userDto.UserEmail , userDto.Password);
+
+        if(user == null)
+        {
+            return null;
+        }
+
+        string token = await GenerateToken(user);
+
+        return token;
+
+    }
+
+
+
+
+    private async Task<string> GenerateToken(User user)
+    {
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
+        var crediantials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+
+        var claims = new List<Claim>
+        {
+            new Claim(JwtRegisteredClaimNames.Sub , user.UserName),
+            new Claim(JwtRegisteredClaimNames.Name , user.UserName),
+            new Claim(JwtRegisteredClaimNames.Email , user.UserEmail),
+            new Claim(ClaimTypes.NameIdentifier , user.Id.ToString()),
+            new Claim("UserId" , user.Id.ToString())
+
+        };
+
+        var token = new JwtSecurityToken
+            (
+            issuer: _configuration["JwtSettings:Issuer"],
+            audience: _configuration["JwtSettings:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddHours(int.Parse(_configuration["JwtSettings:Duration"])),
+            signingCredentials: crediantials
+            );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+
+    }
 
 }

@@ -4,5 +4,7 @@ namespace Application.Services.Interfaces;
 
 public interface IUserServices
 {
-   Task  AddUser(UserDto userDto);
+    Task SignUp(UserSignUpDto userDto);
+    
+    Task<string> SignIn(UserSignInDto userDto);
 }

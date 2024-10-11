@@ -10,7 +10,7 @@ public class MapperConfig : Profile
 
     public MapperConfig()
     {
-            CreateMap<User , UserDto>().ReverseMap();
+            CreateMap<User , UserSignUpDto>().ReverseMap();
     }
 
 }

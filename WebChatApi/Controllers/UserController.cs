@@ -22,22 +22,44 @@ public class UserController : ControllerBase
 
     [ProducesResponseType(StatusCodes.Status201Created)]
     [HttpPost("[Action]")]
-    public async Task<IActionResult> AddNewUser(UserDto userDto)
+    public async Task<IActionResult> SignUp(UserSignUpDto userDto)
     {
 
         try
         {
-            await _userServices.AddUser(userDto);
-            return CreatedAtAction(nameof(AddNewUser) , new {userDto} );
+            await _userServices.SignUp(userDto);
+            return CreatedAtAction(nameof(SignUp), new { userDto.UserName });
         }
         catch (Exception ex)
         {
             return BadRequest(ex.Message);
-            
+
         }
 
     }
 
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [HttpPost("[Action]")]
+    public async Task<ActionResult<string>> SignIn(UserSignInDto userSignInDto)
+    {
+        try
+        {
 
+            var token = await _userServices.SignIn(userSignInDto);
+            if (token == null)
+            {
+                return Unauthorized();
+            }
+            return Ok(token);
+
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+
+        }
+
+
+    }
 
 }
