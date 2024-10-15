@@ -1,0 +1,36 @@
+﻿
+
+<button type="submit" class="btn btn-primary py-3 w-100" disabled="@isbuttonworking" @onclick="clicker">
+
+    @if(isbuttonworking)
+    {
+       <div class="d-flex gap-1 align-items-center">
+           @childContent
+          <div class="spinner-border">
+              <span class="visually-hidden"></span>
+          </div>
+        </div>
+
+    }
+    else
+    {
+        @childContent
+    }
+
+</button>
+
+
+@code{
+
+    [Parameter]
+    public RenderFragment childContent {get ; set;}
+    [Parameter]
+    public bool isbuttonworking {get ; set;}
+
+    public EventCallback OnCliclk {get; set;}
+
+    async Task clicker()
+    {
+        await OnCliclk.InvokeAsync();
+    }
+}
