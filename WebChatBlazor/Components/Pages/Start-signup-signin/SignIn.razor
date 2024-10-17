@@ -1,6 +1,6 @@
 ﻿@page "/signin"
 @layout StartLayout
-@inject IUserServices _userservice
+@inject IAuthenticationService _userservice
 @inject NavigationManager _navmanager
 
 
@@ -94,7 +94,7 @@
         {
             BSpinnerWorking = true;
             await _userservice.SignIn(userdto);
-            _navmanager.NavigateTo("/signup");
+            _navmanager.NavigateTo("/Home");
         }
         catch (ApiException ex)
         {

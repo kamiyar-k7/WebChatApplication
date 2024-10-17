@@ -103,8 +103,8 @@ namespace WebChatBlazor.Services.Base
 
                     var urlBuilder_ = new System.Text.StringBuilder();
                 
-                    // Operation Path: "api/User/SignUp"
-                    urlBuilder_.Append("api/User/SignUp");
+                    // Operation Path: "api/Auth/SignUp"
+                    urlBuilder_.Append("api/Auth/SignUp");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -180,8 +180,8 @@ namespace WebChatBlazor.Services.Base
 
                     var urlBuilder_ = new System.Text.StringBuilder();
                 
-                    // Operation Path: "api/User/SignIn"
-                    urlBuilder_.Append("api/User/SignIn");
+                    // Operation Path: "api/Auth/SignIn"
+                    urlBuilder_.Append("api/Auth/SignIn");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 

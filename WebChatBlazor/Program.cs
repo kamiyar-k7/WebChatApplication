@@ -1,6 +1,9 @@
+using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
+using System.IdentityModel.Tokens.Jwt;
 using WebChatBlazor.Components;
+using WebChatBlazor.Services.AuthServices;
 using WebChatBlazor.Services.Base;
-using WebChatBlazor.Services.UserServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +11,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient<IClient, Client>(url => url.BaseAddress = new Uri("https://localhost:7019"));
 
 #region Injects
-builder.Services.AddScoped<IUserServices, UserServices>();
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddSingleton<JwtSecurityTokenHandler>();
+//services
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<AuthStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(p => p.GetRequiredService<AuthStateProvider>());
 
 
 #endregion

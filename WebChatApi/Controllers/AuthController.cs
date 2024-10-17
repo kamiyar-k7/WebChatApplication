@@ -8,11 +8,11 @@ namespace WebChatApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UserController : ControllerBase
+public class AuthController : ControllerBase
 {
     #region Ctor
     private readonly IUserServices _userServices;
-    public UserController(IUserServices userServices)
+    public AuthController(IUserServices userServices)
     {
         _userServices = userServices;
     }
