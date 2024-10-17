@@ -7,14 +7,12 @@
 
 <div class="container">
     <div class="row justify-content-center align-items-center h-100" style="min-height:100vh;">
-
-        <div class="col-12 col-sm-7 col-md-6 col-lg-5 col-xl-4">
+        <div class="col-12 col-sm-9 col-md-8 col-lg-6 col-xl-5 col-xxl-6">
 
             <EditForm Model="userdto" OnValidSubmit="HandleSignIn">
-                <ValidationSummary />
-                <DataAnnotationsValidator />
+              
 
-                <div class="bg-secondary rounded-3 p-4 p-sm-5 my-4 mx-3">
+                <div class="bg-secondary rounded-3 p-4 p-sm-5 my-4 mx-3" style="background-color: rgba(108, 117, 125, 0.5) !important;">
 
 
                     <h4 class="text-center mb-4 text-uppercase fw-bold"> Sign In</h4>
@@ -22,19 +20,28 @@
                     <div class="form-group">
 
                         <label for="UserEmail">UserEmail</label>
-                        <InputText class="form-control" @bind-Value="userdto.UserEmail"></InputText>
+                        <InputText class="form-control" @bind-Value="userdto.UserEmail" required></InputText>
                         @if (!string.IsNullOrEmpty(GetErrorForField("UserEmail")))
                         {
                             <div style="background-color:black;">  <p class="text-danger">    @GetErrorForField("UserEmail")</p> </div>
                         }
                     </div>
                     <div class="form-group">
-
                         <label for="Password">Password</label>
-                        <InputText type="password" class="form-control" @bind-Value="userdto.Password"></InputText>
+                        <div class="input-group">
+                            <InputText type="@(_showPassword ? "text" : "password")"
+                                       class="form-control"
+                                       @bind-Value="userdto.Password">
+                            </InputText>
+                            <button type="button" class="btn btn-secondary" @onclick="TogglePasswordVisibility">
+                                <i class="@(_showPassword ? "fas fa-eye-slash" : "fas fa-eye")"></i>
+                            </button>
+                        </div>
                         @if (!string.IsNullOrEmpty(GetErrorForField("Password")))
                         {
-                            <div style="background-color:black;">  <p class="text-danger">    @GetErrorForField("Password")</p> </div>
+                            <div style="background-color:black;">
+                                <p class="text-danger">@GetErrorForField("Password")</p>
+                            </div>
                         }
                     </div>
 
@@ -73,6 +80,13 @@
     private string message = string.Empty;
     private Dictionary<string, List<string>> dictionaryErrors = new Dictionary<string, List<string>>();
     private bool BSpinnerWorking = false;
+    private bool _showPassword = false;
+
+    private void TogglePasswordVisibility()
+    {
+        _showPassword = !_showPassword;
+    }
+
 
     public async Task HandleSignIn()
     {
@@ -85,28 +99,22 @@
         catch (ApiException ex)
         {
             BSpinnerWorking = false;
-            var res = await ExceptionHandler.HandleApiException(ex);
 
-            if (res is Dictionary<string, List<string>> errors)
+            var error = await  ExceptionHandler.HandleApiException(ex);
+
+            if(error is Dictionary<string , List<string>> errors)
             {
-                foreach (var error in errors)
-                {
-                    string propertyname = error.Key;
-
-                    if (dictionaryErrors.ContainsKey(propertyname))
-                    {
-                        dictionaryErrors[propertyname].AddRange(error.Value);
-                        continue;
-                    }
-                    dictionaryErrors[propertyname] = error.Value;
-                }
+                dictionaryErrors = errors;
             }
-            else if (res is ExeptionDto excptionDto)
+            else if(error is ExeptionDto exdto)
             {
-                message = $"{excptionDto.Message}, {excptionDto.StatusCode}";
-                //working = false;
-            }
+                message = $"{exdto.Message}";
 
+            }
+            else
+            {
+                message = $"{ex.Message}";
+            }
 
 
         }

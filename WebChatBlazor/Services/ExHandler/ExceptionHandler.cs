@@ -2,70 +2,64 @@
 using System.Text.Json;
 using WebChatBlazor.Services.Base;
 
+
 namespace WebChatBlazor.Services.ExHandler;
 
 
 public static class ExceptionHandler
 {
     private static Dictionary<string, List<string>> DictioneryErrors { get; } = new Dictionary<string, List<string>>();
-
     public static async Task<object> HandleApiException(ApiException ex)
     {
-        
+
         try
         {
-            if (ex.Response.Contains("propertyname"))
+            var errors = JsonSerializer.Deserialize<JsonElement>(ex.Response);
+            DictioneryErrors.Clear();
+            if (errors.ValueKind == JsonValueKind.Array ) 
             {
-                using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(ex.Response)))
+                foreach (var error in errors.EnumerateArray())
                 {
 
-                    var errorsList = await JsonSerializer.DeserializeAsync<List<Dictionary<string, object>>>(stream);
-
-
-                    foreach (var error in errorsList)
+                    if (error.TryGetProperty("propertyname", out var propertyName) &&
+                        error.TryGetProperty("errors", out var errorMessages) &&
+                            errorMessages.ValueKind == JsonValueKind.Array)
                     {
-                        if (error.TryGetValue("propertyname", out var propertyName) &&
-                            error.TryGetValue("errors", out var errorMessages))
-                        {
-                            DictioneryErrors[propertyName.ToString()] = JsonSerializer.Deserialize<List<string>>(errorMessages.ToString());
-                        }
+                        var errorlist = JsonSerializer.Deserialize<List<string>>(errorMessages.GetRawText());
+                        DictioneryErrors[propertyName.GetString() ?? ""] = errorlist;
                     }
-                    return DictioneryErrors; // Return populated dictionary
-
                 }
+                return DictioneryErrors; 
+
             }
             else
             {
                 return new ExeptionDto
                 {
                     Message = ex.Response,
-                    StatusCode = ex.StatusCode
+                    StatusCode = ex.StatusCode,
                 };
-
             }
-                  
-                
-            
+       
+          
         }
-        catch 
+        catch
         {
-            
             return new ExeptionDto
             {
-                Message = "Received an invalid response from the server.",
-                StatusCode = ex.StatusCode
+                Message = ex.Response,
+                StatusCode = ex.StatusCode,
             };
         }
-
-
        
+ 
     }
+
 }
-
-
-public  class ExeptionDto
+public class ExeptionDto
 {
-    public  string Message { get; set; }
-    public  int StatusCode { get; set; }
+    public string Message { get; set; }
+    public int StatusCode { get; set; }
 }
+
 
