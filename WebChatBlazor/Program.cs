@@ -1,6 +1,20 @@
 using WebChatBlazor.Components;
+using WebChatBlazor.Services.Base;
+using WebChatBlazor.Services.UserServices;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Connect Api
+builder.Services.AddHttpClient<IClient, Client>(url => url.BaseAddress = new Uri("https://localhost:7019"));
+
+#region Injects
+builder.Services.AddScoped<IUserServices, UserServices>();
+
+
+#endregion
+
+builder.Services.AddServerSideBlazor()
+    .AddCircuitOptions(options => { options.DetailedErrors = true; });
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

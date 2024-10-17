@@ -32,6 +32,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
+           
             return BadRequest(ex.Message);
 
         }
@@ -39,6 +40,8 @@ public class UserController : ControllerBase
     }
 
     [ProducesResponseType(StatusCodes.Status200OK)]
+    //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    //[ProducesResponseType(StatusCodes.Status400BadRequest)]
     [HttpPost("[Action]")]
     public async Task<ActionResult<string>> SignIn(UserSignInDto userSignInDto)
     {
@@ -48,7 +51,7 @@ public class UserController : ControllerBase
             var token = await _userServices.SignIn(userSignInDto);
             if (token == null)
             {
-                return Unauthorized();
+                return Unauthorized("The Error or Password Are Incorecct!");
             }
             return Ok(token);
 

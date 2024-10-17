@@ -1,4 +1,5 @@
-﻿using Application.Services.Interfaces;
+﻿using Application.Serilizer;
+using Application.Services.Interfaces;
 using Application.Staticks;
 using Application.ViewModel_And_Dto.Dto;
 using Application.ViewModel_And_Dto.Dto.UserSide;
@@ -13,6 +14,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Application.Services.Implentation;
 
@@ -53,14 +55,14 @@ public class UserServices : IUserServices
                 errors = x.Select(x => x.ErrorMessage).ToList()
             }).ToList();
 
-            var serializederrors = JsonSerializer.Serialize(errors, options: new JsonSerializerOptions { WriteIndented = true });
-
+            //    var serializederrors = JsonSerializer.Serialize(errors, options: new JsonSerializerOptions { WriteIndented = true });
+            var serializederrors = MyJsonSerial.Serialize(errors);
             throw new Exception(serializederrors);
         }
         var exist = await _userRepository.IsExist(userDto.UserEmail);
         if (exist)
         {
-            throw new Exception("The User IS Already Exist");
+            throw new Exception("The Email Is Already Exist");
         }
 
         var role = await _roleRepository.GetRoleName(StaticRoleNames.User);
@@ -83,7 +85,7 @@ public class UserServices : IUserServices
 
 
     }
-
+   
     public async Task<string> SignIn(UserSignInDto userDto)
     {
 
@@ -93,7 +95,7 @@ public class UserServices : IUserServices
         if (!res.IsValid)
         {
             var errorgroups = res.Errors.GroupBy(x => x.PropertyName).ToList();
-            List<ValidationDto> Errors = errorgroups.Select(x => new ValidationDto
+            var Errors = errorgroups.Select(x => new 
             {
                 propertyname = x.Key,
                 errors = x.Select(x => x.ErrorMessage).ToList()
@@ -111,12 +113,14 @@ public class UserServices : IUserServices
 
         if(user == null)
         {
+            //throw new Exception("The Emial Or Password Are Incorrect");
             return null;
         }
 
         string token = await GenerateToken(user);
-
-        return token;
+      
+        var serializedtoken = MyJsonSerial.Serialize(token);
+        return serializedtoken;
 
     }
 

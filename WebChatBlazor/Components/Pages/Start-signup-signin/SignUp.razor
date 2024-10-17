@@ -1,0 +1,190 @@
+﻿@page "/signup"
+@layout StartLayout
+@inject IUserServices _userservice
+@inject NavigationManager _navmanager
+
+
+<BootStrapModal @ref="bootStrapModal" url="/signin">
+    <headtext>
+        <p class="">Successfull!</p>
+    </headtext>
+    <bodytext>
+        <p class="">U will Dicrect To The SignIn Page Atomatically in : @time Seconds</p>
+    </bodytext>
+</BootStrapModal>
+
+<div class="container">
+    <div class="row justify-content-center align-items-center h-100" style="min-height:100vh;">
+
+        <div class="col-12 col-sm-9 col-md-8 col-lg-6 col-xl-5 col-xxl-6">
+
+            <EditForm Model="userdto" OnValidSubmit="HandleSignUp">
+                <ValidationSummary />
+                <DataAnnotationsValidator />
+
+                <div class="bg-secondary rounded-3 p-4 p-sm-5 my-4 mx-3" style="background-color: rgba(108, 117, 125, 0.5) !important;">
+
+
+                    <h4 class="text-center mb-4 text-uppercase fw-bold"> Sign Up</h4>
+
+                    <div class="form-group">
+
+                        <label for="UserName">UserName</label>
+                        <InputText class="form-control" @bind-Value="userdto.UserName" required></InputText>
+                        @if (!string.IsNullOrEmpty(GetErrorForField("UserName")))
+                        {
+                            <div class="text-danger small fw-bold" style="margin-top: 0.25rem; background-color:aliceblue">
+                                @GetErrorForField("UserName")
+                            </div>
+                        }
+                    </div>
+                    <div class="form-group">
+
+                        <label for="UserEmail">UserEmail</label>
+                        <InputText class="form-control" @bind-Value="userdto.UserEmail" required><span class="password-toggle-icon"><i class="fas fa-eye"></i></span></InputText>
+                        @if (!string.IsNullOrEmpty(GetErrorForField("UserEmail")))
+                        {
+                            <div class="text-danger small fw-bold" style="margin-top: 0.25rem; background-color:aliceblue">
+                                @GetErrorForField("UserEmail")
+                            </div>
+                        }
+                    </div>
+                    <div class="form-group">
+                        <label for="Password">Password</label>
+                        <div class="input-group">
+                            <InputText type="@(_showPassword ? "text" : "password")"
+                                       class="form-control"
+                                       @bind-Value="userdto.Password">
+                            </InputText>
+                            <button type="button" class="btn btn-secondary" @onclick="TogglePasswordVisibility">
+                                <i class="@(_showPassword ? "fas fa-eye-slash" : "fas fa-eye")"></i>
+                            </button>
+                        </div>
+                        @if (!string.IsNullOrEmpty(GetErrorForField("Password")))
+                        {
+                            <div style="background-color:black;">
+                                <p class="text-danger">@GetErrorForField("Password")</p>
+                            </div>
+                        }
+                    </div>
+                    <br />
+                    @if (!string.IsNullOrEmpty(message))
+                    {
+                        <div class="alert alert-danger">
+                            <p>
+                                @message
+                            </p>
+                        </div>
+                    }
+                    <div class="d-flex flex-column flex-md-row gap-3">
+
+                        <SpinnerButton isbuttonworking=BSpinnerWorking>
+                            Submit
+                        </SpinnerButton>
+                        <a href="/" class="btn btn-light py-3 w-100">Cancel</a>
+                    </div>
+                    <br />
+                    <a href="/signIn" class="text-info">Alreade Have An Acoount?</a>
+
+                </div>
+            </EditForm>
+
+
+        </div>
+
+
+    </div>
+</div>
+
+
+
+
+
+
+@code {
+    private UserSignUpDto userdto = new UserSignUpDto();
+    private string message = string.Empty;
+    private bool BSpinnerWorking = false;
+    private BootStrapModal bootStrapModal;
+    private int time = 5;
+    private Timer? _timer;
+    private Dictionary<string, List<string>> dictionaryErrors = new Dictionary<string, List<string>>();
+
+
+    private bool _showPassword = false;
+
+    private void TogglePasswordVisibility()
+    {
+        _showPassword = !_showPassword;
+    }
+
+    public async Task HandleSignUp()
+    {
+        try
+        {
+            dictionaryErrors.Clear();
+
+            BSpinnerWorking = true;
+
+
+            await _userservice.SignUp(userdto);
+
+            await bootStrapModal.OpenModal();
+
+            time = 5;
+            while (time > 0)
+            {
+                await Task.Delay(1000);
+
+                time--;
+                InvokeAsync(StateHasChanged);
+            }
+
+            await bootStrapModal.CloseModal();
+
+            _navmanager.NavigateTo("/signIn");
+
+
+
+        }
+        catch (ApiException ex)
+        {
+
+            BSpinnerWorking = false;
+
+
+            var error = await ExceptionHandler.HandleApiException(ex);
+
+            if (error is Dictionary<string, List<string>> errors)
+            {
+                dictionaryErrors = errors;
+            }
+            else if(error is ExeptionDto exdto)
+            {
+                message = $"{exdto.Message}";
+            }
+            else
+            {
+                message = $"{error}";
+            }
+
+
+        }
+
+    }
+
+    private string GetErrorForField(string fieldName)
+    {
+
+        if (dictionaryErrors.ContainsKey(fieldName))
+        {
+            return string.Join("!\n ", dictionaryErrors[fieldName]);
+        }
+        return string.Empty;
+    }
+}
+
+
+
+
+
