@@ -1,10 +1,12 @@
 ﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Authorization.Policy;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 
-public class AuthStateProvider : AuthenticationStateProvider
+public partial class AuthStateProvider : AuthenticationStateProvider
 {
 
     #region Ctor
@@ -24,19 +26,19 @@ public class AuthStateProvider : AuthenticationStateProvider
         var notloggedin = new ClaimsPrincipal(new ClaimsIdentity());
 
         var savedtoken = await _localStorage.GetItemAsync<string>("token");
-        if (savedtoken == null) 
+        if (savedtoken == null)
         {
             return new AuthenticationState(notloggedin);
         }
 
         var tokencontent = _TokenHandler.ReadJwtToken(savedtoken);
-        if (tokencontent.ValidTo < DateTime.UtcNow) 
+        if (tokencontent.ValidTo < DateTime.UtcNow)
         {
             return new AuthenticationState(notloggedin);
         }
 
         var claims = await GetClaims();
-  
+
         var user = new ClaimsPrincipal(new ClaimsIdentity(claims, "jwt"));
 
         return new AuthenticationState(user);
@@ -50,14 +52,14 @@ public class AuthStateProvider : AuthenticationStateProvider
         var user = new ClaimsPrincipal(new ClaimsIdentity(claims, "jwt"));
 
         var authstate = Task.FromResult(new AuthenticationState(user));
-       NotifyAuthenticationStateChanged(authstate);
+        NotifyAuthenticationStateChanged(authstate);
     }
 
     public void LoggedOut()
     {
         var notloggedin = new ClaimsPrincipal(new ClaimsIdentity());
         var authstate = Task.FromResult(new AuthenticationState(notloggedin));
-        NotifyAuthenticationStateChanged(authstate);  
+        NotifyAuthenticationStateChanged(authstate);
     }
     private async Task<List<Claim>> GetClaims()
     {
@@ -66,5 +68,15 @@ public class AuthStateProvider : AuthenticationStateProvider
         var claims = tokencontent.Claims.ToList();
         claims.Add(new Claim(ClaimTypes.Name, tokencontent.Subject));
         return claims;
+    }
+
+
+    // fixed attribute
+    public class BlazorAuthorizationMiddlewareResultHandler : IAuthorizationMiddlewareResultHandler
+    {
+        public Task HandleAsync(RequestDelegate next, HttpContext context, AuthorizationPolicy policy, PolicyAuthorizationResult authorizeResult)
+        {
+            return next(context);
+        }
     }
 }

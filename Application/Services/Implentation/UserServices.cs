@@ -69,6 +69,7 @@ public class UserServices : IUserServices
 
         var user = _mapper.Map<User>(userDto); // encode password later
         user.RoleName = role.RoleName;
+        user.CreatedAt = DateTime.Now;
 
         UserSelectedRole userSelectedRole = new UserSelectedRole()
         {

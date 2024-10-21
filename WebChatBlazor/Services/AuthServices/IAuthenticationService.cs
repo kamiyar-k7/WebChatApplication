@@ -6,4 +6,5 @@ public interface IAuthenticationService
 {
     Task SignUp(UserSignUpDto userdto);
     Task SignIn(UserSignInDto userdto);
+    Task GetToken();
 }

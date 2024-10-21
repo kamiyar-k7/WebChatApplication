@@ -1,25 +1,83 @@
 ﻿@inherits LayoutComponentBase
-
-<div class="page">
-   @*  <div class="sidebar">
-        <NavMenu />
-    </div> *@
-
-    <main>
-      
-
-        <article class="content px-4">
-            @Body
-        </article>
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
 
+<MudLayout>
 
-    </main>
 
-</div>
+    <MudAppBar >
+        <MudGrid Class="d-flex align-items-center">
+            <MudItem>
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@(() => DrawerButton())" />
+                Web Chat
+            </MudItem>
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
+            <MudSpacer /> <!-- This will push the next MudItem to the right -->
+
+            <MudItem Class="d-flex align-items-center justify-content-end">
+                <MudTextField @bind-Value="search"
+                              Placeholder="Search UserNames"
+                              Variant="Variant.Outlined"
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              OnAdornmentClick="SearchUsers"
+                              Class="white-text"
+                               />
+            </MudItem>
+        </MudGrid>
+    </MudAppBar>
+
+
+    <MudDrawer @bind-Open="@opendrawer" Class="white-text" Style="background-color:rgba(89, 74, 226, 1);">
+
+
+
+        <MudNavMenu Class="mt-1">
+
+            <MudNavLink Href="/" Match="NavLinkMatch.All">Home</MudNavLink>
+            <MudNavLink Href="/" Match="NavLinkMatch.Prefix">My Profile</MudNavLink>
+
+            <MudNavGroup Title="check">
+
+                <MudNavLink Href="/" Match="NavLinkMatch.Prefix">Settings</MudNavLink>
+                <MudNavLink Href="/" Match="NavLinkMatch.Prefix" Class="text-danger">LogOut</MudNavLink>
+            
+            </MudNavGroup>
+
+            <MudNavLink  Match="NavLinkMatch.Prefix">Theme</MudNavLink>
+
+            <MudNavLink Href="/" Match="NavLinkMatch.Prefix">About</MudNavLink>
+
+        </MudNavMenu>
+    </MudDrawer>
+
+
+    <MudMainContent Class="bg-dark">
+        @Body
+    </MudMainContent>
+
+</MudLayout>
+
+@code {
+    public string search = string.Empty;
+    bool opendrawer = false;
+
+    void DrawerButton()
+    {
+        opendrawer = !opendrawer;
+    }
+
+    void SearchUsers()
+    {
+
+    }
+}
+
+
+
+
+
+

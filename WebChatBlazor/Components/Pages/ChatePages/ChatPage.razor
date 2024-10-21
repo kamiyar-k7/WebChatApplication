@@ -1,0 +1,87 @@
+﻿@page "/chatpage"
+@inject NavigationManager _navmanager;
+@layout ChatLayout
+
+<MudAppBar Style="height:70px;" Class="d-flex justify-content-center">
+
+    <MudGrid Class="d-flex align-items-center">
+
+        <MudItem>
+            <MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowLeft" Edge="Edge.Start" OnClick="BackToHome" Style="color:white;" />
+
+        </MudItem>
+
+        <MudItem Class="">
+            <MudImage Src="/Images/webicon.jpg"
+                      Alt="User Profile"
+                      ObjectFit="ObjectFit.Cover"
+                      Fluid="true"
+                      Width="50"
+                      Height="50"
+                      ObjectPosition="ObjectPosition.Center"
+                      Class="rounded-circle" />
+
+        </MudItem>
+
+        <MudItem>
+            <MudText Class="h6 fw-bold">User Name</MudText>
+            <MudText Class="fw-light">Online</MudText>
+        </MudItem>
+
+        <MudSpacer />
+        <MudItem Class="d-flex justify-content-end">
+            <MudIconButton Icon="@Icons.Material.Filled.Savings" Size="Size.Large" Edge="Edge.End" Style="color:white;" />
+        </MudItem>
+
+    </MudGrid>
+
+</MudAppBar>
+
+<MudAppBar Bottom="true" Fixed="true" Elevation="1" Style="height:70px;" Class="d-flex justify-content-center bg-dark">
+
+    <MudGrid Class=" d-flex align-items-center" Style="height:60px;">
+
+        <MudItem xs="10" Class="d-flex ">
+            <MudTextField @bind-Value="@message"
+                          Placeholder="Type your message..."
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.None"
+                          Class="w-100 white-text"
+                          Rows="3"
+                          Style=" height: 40px;" />
+        </MudItem>
+
+        <MudItem xs="2" Class="d-flex justify-content-end">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       EndIcon="@Icons.Material.Filled.Send"
+                       IconColor="Color.Info"
+                       Class="w-100 white-text"
+                       Style="height: 40px;">
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudAppBar>
+
+
+
+
+@code {
+    private string message;
+
+    private void BackToHome()
+    {
+        _navmanager.NavigateTo("/");
+    }
+
+    private void SendMessage()
+    {
+        // Implement the message send logic
+        Console.WriteLine($"Message Sent: {message}");
+        message = string.Empty; // Clear input after sending
+    }
+}
+
+
+
+

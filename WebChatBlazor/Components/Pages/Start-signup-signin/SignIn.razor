@@ -87,6 +87,15 @@
         _showPassword = !_showPassword;
     }
 
+    private string GetErrorForField(string fieldName)
+    {
+        if (dictionaryErrors.ContainsKey(fieldName))
+        {
+            return string.Join(",", dictionaryErrors[fieldName]);
+        }
+        return string.Empty;
+    }
+
 
     public async Task HandleSignIn()
     {
@@ -94,7 +103,7 @@
         {
             BSpinnerWorking = true;
             await _userservice.SignIn(userdto);
-            _navmanager.NavigateTo("/Home");
+            _navmanager.NavigateTo("/");
         }
         catch (ApiException ex)
         {
@@ -113,20 +122,11 @@
             }
             else
             {
-                message = $"{ex.Message}";
+                message = $"{ex.Response}";
             }
 
 
         }
-    }
-
-    private string GetErrorForField(string fieldName)
-    {
-        if (dictionaryErrors.ContainsKey(fieldName))
-        {
-            return string.Join(",", dictionaryErrors[fieldName]);
-        }
-        return string.Empty;
     }
 }
 

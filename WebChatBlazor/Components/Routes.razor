@@ -2,12 +2,14 @@
     <Router AppAssembly="typeof(Program).Assembly">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+             
                 <NotAuthorized>
+
                     @if (context.User?.Identity?.IsAuthenticated == false)
                     {
                         <RedirectToLogin />
                     }
-                    else
+                    else 
                     {
                         <div class="alert alert-warning">
                             <p>

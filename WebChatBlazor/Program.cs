@@ -1,24 +1,35 @@
 using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
+using MudBlazor.Services;
 using System.IdentityModel.Tokens.Jwt;
 using WebChatBlazor.Components;
 using WebChatBlazor.Services.AuthServices;
 using WebChatBlazor.Services.Base;
+using static AuthStateProvider;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Connect Api
 builder.Services.AddHttpClient<IClient, Client>(url => url.BaseAddress = new Uri("https://localhost:7019"));
 
+
+
+
 #region Injects
+//mud blazor
+builder.Services.AddMudServices();
+
+
+// jwt injects
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddSingleton<JwtSecurityTokenHandler>();
-//services
-builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, BlazorAuthorizationMiddlewareResultHandler>();
 builder.Services.AddScoped<AuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(p => p.GetRequiredService<AuthStateProvider>());
 
 
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 #endregion
 
 builder.Services.AddServerSideBlazor()
@@ -41,6 +52,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
+
+
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()

@@ -34,8 +34,16 @@ public class AuthenticationService : IAuthenticationService
         //change auth of app
          await   ((AuthStateProvider)_authprovider).LoggedIn();
 
+    }
 
-
+    public async Task GetToken()
+    {
+        var token = await _localStorage.GetItemAsync<string>("token");
+        if (token != null)
+        {
+            // Set the Authorization header with the bearer token
+            _client.HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        }
     }
 
 }
