@@ -3,8 +3,10 @@ using Application.Services.Implentation;
 using Application.Services.Interfaces;
 using Application.Validation;
 using Application.ViewModel_And_Dto.Dto.UserSide;
+using Doamin.IRepository.ChatPart;
 using Doamin.IRepository.UserPart;
 using FluentValidation;
+using InfruStructure.Repository.ChatPart;
 using InfruStructure.Repository.UserPart;
 using InfruStructure.WebChatDbContext;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -37,11 +39,13 @@ builder.Services.AddAutoMapper(typeof(MapperConfig));
 #region Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
 
 #endregion
 
 #region Services
 builder.Services.AddScoped<IUserServices, UserServices>();
+builder.Services.AddScoped<IChatServices, ChatServices>();
 
 #endregion
 

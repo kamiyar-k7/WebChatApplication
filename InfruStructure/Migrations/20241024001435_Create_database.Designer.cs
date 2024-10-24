@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InfruStructure.Migrations
 {
     [DbContext(typeof(ChatDbContext))]
-    [Migration("20241011144544_create-database")]
-    partial class createdatabase
+    [Migration("20241024001435_Create_database")]
+    partial class Create_database
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,80 +25,34 @@ namespace InfruStructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Doamin.Entities.Chats.ChatRoom", b =>
+            modelBuilder.Entity("Doamin.Entities.ChatEntites.Messages", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsGroup")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ChatRooms");
-                });
-
-            modelBuilder.Entity("Doamin.Entities.Chats.Message", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ChatRoomId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Content")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("ResiverId")
+                        .HasColumnType("int");
 
                     b.Property<int>("SenderId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ChatRoomId");
+                    b.HasIndex("ResiverId");
 
                     b.HasIndex("SenderId");
 
                     b.ToTable("Messages");
-                });
-
-            modelBuilder.Entity("Doamin.Entities.Chats.UserChatRoom", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ChatRoomId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChatRoomId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserChatRooms");
                 });
 
             modelBuilder.Entity("Doamin.Entities.UserEntities.Role", b =>
@@ -139,13 +93,11 @@ namespace InfruStructure.Migrations
 
                     b.Property<string>("UserEmail")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -183,42 +135,23 @@ namespace InfruStructure.Migrations
                     b.ToTable("UserSelectedRoles");
                 });
 
-            modelBuilder.Entity("Doamin.Entities.Chats.Message", b =>
+            modelBuilder.Entity("Doamin.Entities.ChatEntites.Messages", b =>
                 {
-                    b.HasOne("Doamin.Entities.Chats.ChatRoom", "ChatRoom")
+                    b.HasOne("Doamin.Entities.UserEntities.User", "Resiver")
                         .WithMany()
-                        .HasForeignKey("ChatRoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ResiverId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Doamin.Entities.UserEntities.User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("ChatRoom");
+                    b.Navigation("Resiver");
 
                     b.Navigation("Sender");
-                });
-
-            modelBuilder.Entity("Doamin.Entities.Chats.UserChatRoom", b =>
-                {
-                    b.HasOne("Doamin.Entities.Chats.ChatRoom", "ChatRoom")
-                        .WithMany("UserChatRooms")
-                        .HasForeignKey("ChatRoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Doamin.Entities.UserEntities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ChatRoom");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Doamin.Entities.UserEntities.UserSelectedRole", b =>
@@ -238,11 +171,6 @@ namespace InfruStructure.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Doamin.Entities.Chats.ChatRoom", b =>
-                {
-                    b.Navigation("UserChatRooms");
                 });
 
             modelBuilder.Entity("Doamin.Entities.UserEntities.Role", b =>

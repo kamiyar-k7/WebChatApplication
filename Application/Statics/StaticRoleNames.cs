@@ -1,9 +1,8 @@
-﻿
-namespace Application.Staticks;
+﻿namespace Application.Statics;
 
 public static class StaticRoleNames
 {
 
-    public  const string Admin = "Admin";
-    public  const string User = "User";
+    public const string Admin = "Admin";
+    public const string User = "User";
 }

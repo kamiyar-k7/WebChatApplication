@@ -4,16 +4,21 @@ using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor.Services;
 using System.IdentityModel.Tokens.Jwt;
 using WebChatBlazor.Components;
+using WebChatBlazor.Components.CustomComponents;
 using WebChatBlazor.Services.AuthServices;
 using WebChatBlazor.Services.Base;
+using WebChatBlazor.Services.ChatServices;
 using static AuthStateProvider;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<UserProvider>();
+
+
 // Connect Api
 builder.Services.AddHttpClient<IClient, Client>(url => url.BaseAddress = new Uri("https://localhost:7019"));
-
-
 
 
 #region Injects
@@ -29,7 +34,9 @@ builder.Services.AddScoped<AuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(p => p.GetRequiredService<AuthStateProvider>());
 
 
+//Servcies
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IPrivateChatService, PrivateChatServices>();
 #endregion
 
 builder.Services.AddServerSideBlazor()

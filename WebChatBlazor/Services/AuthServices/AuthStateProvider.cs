@@ -61,7 +61,7 @@ public partial class AuthStateProvider : AuthenticationStateProvider
         var authstate = Task.FromResult(new AuthenticationState(notloggedin));
         NotifyAuthenticationStateChanged(authstate);
     }
-    private async Task<List<Claim>> GetClaims()
+    public async Task<List<Claim>> GetClaims()
     {
         var savedtoken = await _localStorage.GetItemAsync<string>("token");
         var tokencontent = _TokenHandler.ReadJwtToken(savedtoken);
@@ -69,6 +69,7 @@ public partial class AuthStateProvider : AuthenticationStateProvider
         claims.Add(new Claim(ClaimTypes.Name, tokencontent.Subject));
         return claims;
     }
+
 
 
     // fixed attribute

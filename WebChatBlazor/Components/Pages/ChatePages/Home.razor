@@ -1,7 +1,9 @@
 ﻿@page "/"
 @attribute [Authorize]
 @layout MainLayout
-@inject NavigationManager _navmabager;
+@inject NavigationManager _navmanager;
+@inject UserProvider _userProvider
+@inject IHttpContextAccessor _httpContextAccessor
 
 
 <MudItem Class="row overflow-hidden">
@@ -154,9 +156,24 @@
 
 
 @code {
+    protected override async void OnInitialized()
+    {
 
+        await _userProvider.SetCurrentUserFromClaims();
+
+    }
+
+
+
+   
     void OpenChat()
     {
-        _navmabager.NavigateTo("chatpage");
+      
+        _navmanager.NavigateTo("chatpage/2");
     }
+
+
+  
 }
+
+

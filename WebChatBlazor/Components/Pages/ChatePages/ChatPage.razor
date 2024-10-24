@@ -1,7 +1,10 @@
-﻿@page "/chatpage"
-@inject NavigationManager _navmanager;
+﻿@page "/chatpage/2"
 @layout ChatLayout
+@inject NavigationManager _navmanager;
+@inject UserProvider _userprovider;
+@inject IPrivateChatService _chatservice
 
+<!--top app bar-->
 <MudAppBar Style="height:70px;" Class="d-flex justify-content-center">
 
     <MudGrid Class="d-flex align-items-center">
@@ -37,48 +40,84 @@
 
 </MudAppBar>
 
-<MudAppBar Bottom="true" Fixed="true" Elevation="1" Style="height:70px;" Class="d-flex justify-content-center bg-dark">
 
-    <MudGrid Class=" d-flex align-items-center" Style="height:60px;">
 
-        <MudItem xs="10" Class="d-flex ">
-            <MudTextField @bind-Value="@message"
-                          Placeholder="Type your message..."
-                          Variant="Variant.Outlined"
-                          Adornment="Adornment.None"
-                          Class="w-100 white-text"
-                          Rows="3"
-                          Style=" height: 40px;" />
-        </MudItem>
+<!--Bottom app bar-->
+<MudAppBar Bottom="true" Fixed="true" Elevation="1" Style="height:100px;" Class="d-flex justify-content-center bg-dark">
 
-        <MudItem xs="2" Class="d-flex justify-content-end">
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       EndIcon="@Icons.Material.Filled.Send"
-                       IconColor="Color.Info"
-                       Class="w-100 white-text"
-                       Style="height: 40px;">
-            </MudButton>
-        </MudItem>
-    </MudGrid>
+
+    <EditForm Model="model" OnValidSubmit="SendMessage" Class=" d-flex align-items-center col-12" Style="height:auto;">
+
+        <MudGrid Class=" d-flex align-items-center" Style="height:auto;">
+
+            <MudItem xs="10" Class="d-flex">
+
+                <MudTextField @bind-Value="@model.Content"
+                              Placeholder="Type your message..."
+                              Variant="Variant.Outlined"
+                              Adornment="Adornment.None"
+                              Class="w-100 white-text"
+                              AutoGrow
+                              MaxLines="3"
+                              Style="height: auto;" />
+
+            </MudItem>
+
+            <MudItem xs="2" Class="d-flex justify-content-end">
+                <MudButton ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           EndIcon="@Icons.Material.Filled.Send"
+                           IconColor="Color.Info"
+                           Class="w-100 white-text"
+                           Style="height: 40px; ">
+                </MudButton>
+            </MudItem>
+
+        </MudGrid>
+
+    </EditForm>
+
 </MudAppBar>
 
 
 
 
 @code {
-    private string message;
+
+    UserContext currentUser { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUser = await _userprovider.SetCurrentUserFromClaims();
+        Console.WriteLine($"current username {currentUser.UserName} Id : {currentUser.UserId}");
+        await base.OnInitializedAsync();
+    }
 
     private void BackToHome()
     {
         _navmanager.NavigateTo("/");
     }
 
-    private void SendMessage()
+
+    private int ResiverId;
+    private MessageDto model = new MessageDto();
+
+
+    private async Task SendMessage()
     {
-        // Implement the message send logic
-        Console.WriteLine($"Message Sent: {message}");
-        message = string.Empty; // Clear input after sending
+        try
+        {
+            model.SenderId = currentUser.UserId;
+            model.ResiverId = 2;
+            await _chatservice.SendMessage(model);
+        }
+
+        catch (ApiException ex)
+        {
+
+            Console.WriteLine(ex.Message);
+        }
     }
 }
 

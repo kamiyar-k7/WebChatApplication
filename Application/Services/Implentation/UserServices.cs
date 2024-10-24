@@ -1,20 +1,19 @@
 ﻿using Application.Serilizer;
 using Application.Services.Interfaces;
-using Application.Staticks;
+using Application.Statics;
 using Application.ViewModel_And_Dto.Dto;
 using Application.ViewModel_And_Dto.Dto.UserSide;
 using AutoMapper;
 using Doamin.Entities.UserEntities;
 using Doamin.IRepository.UserPart;
 using FluentValidation;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 namespace Application.Services.Implentation;
 

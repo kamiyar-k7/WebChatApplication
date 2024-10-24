@@ -6,26 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace InfruStructure.Migrations
 {
     /// <inheritdoc />
-    public partial class createdatabase : Migration
+    public partial class Create_database : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "ChatRooms",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsGroup = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ChatRooms", x => x.Id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
@@ -45,8 +30,8 @@ namespace InfruStructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    UserEmail = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     RoleName = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -62,52 +47,26 @@ namespace InfruStructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Content = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    ChatRoomId = table.Column<int>(type: "int", nullable: false),
                     SenderId = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    ResiverId = table.Column<int>(type: "int", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Messages", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Messages_ChatRooms_ChatRoomId",
-                        column: x => x.ChatRoomId,
-                        principalTable: "ChatRooms",
+                        name: "FK_Messages_Users_ResiverId",
+                        column: x => x.ResiverId,
+                        principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Messages_Users_SenderId",
                         column: x => x.SenderId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserChatRooms",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    ChatRoomId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserChatRooms", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_UserChatRooms_ChatRooms_ChatRoomId",
-                        column: x => x.ChatRoomId,
-                        principalTable: "ChatRooms",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserChatRooms_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -139,24 +98,14 @@ namespace InfruStructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Messages_ChatRoomId",
+                name: "IX_Messages_ResiverId",
                 table: "Messages",
-                column: "ChatRoomId");
+                column: "ResiverId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_SenderId",
                 table: "Messages",
                 column: "SenderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserChatRooms_ChatRoomId",
-                table: "UserChatRooms",
-                column: "ChatRoomId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserChatRooms_UserId",
-                table: "UserChatRooms",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserSelectedRoles_RoleId",
@@ -176,13 +125,7 @@ namespace InfruStructure.Migrations
                 name: "Messages");
 
             migrationBuilder.DropTable(
-                name: "UserChatRooms");
-
-            migrationBuilder.DropTable(
                 name: "UserSelectedRoles");
-
-            migrationBuilder.DropTable(
-                name: "ChatRooms");
 
             migrationBuilder.DropTable(
                 name: "Roles");

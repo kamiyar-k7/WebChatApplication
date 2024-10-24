@@ -4,7 +4,6 @@
 @inject NavigationManager _navmanager
 
 
-
 <div class="container">
     <div class="row justify-content-center align-items-center h-100" style="min-height:100vh;">
         <div class="col-12 col-sm-9 col-md-8 col-lg-6 col-xl-5 col-xxl-6">
@@ -59,10 +58,10 @@
                         <SpinnerButton isbuttonworking="BSpinnerWorking">
                             Submit
                         </SpinnerButton>
-                        <a href="/" class="btn btn-light py-3 w-100">Cancel</a>
+                        <a href="/Start" class="btn btn-light py-3 w-100">Cancel</a>
                     </div>
                     <br />
-                    <a href="/signIn" class="text-info">Alreade Have An Acoount?</a>
+                    <a href="/SignUp" class="text-info">Create A New  Acoount?</a>
 
                 </div>
             </EditForm>
@@ -76,11 +75,17 @@
 
 
 @code {
+    
+
+
+
     private UserSignInDto userdto = new UserSignInDto();
     private string message = string.Empty;
     private Dictionary<string, List<string>> dictionaryErrors = new Dictionary<string, List<string>>();
     private bool BSpinnerWorking = false;
     private bool _showPassword = false;
+
+           
 
     private void TogglePasswordVisibility()
     {
@@ -103,6 +108,9 @@
         {
             BSpinnerWorking = true;
             await _userservice.SignIn(userdto);
+          
+         
+
             _navmanager.NavigateTo("/");
         }
         catch (ApiException ex)

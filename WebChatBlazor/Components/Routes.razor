@@ -1,27 +1,33 @@
-﻿<CascadingAuthenticationState>
-    <Router AppAssembly="typeof(Program).Assembly">
-        <Found Context="routeData">
-            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
-             
-                <NotAuthorized>
+﻿
+<CascadingAuthenticationState>
 
-                    @if (context.User?.Identity?.IsAuthenticated == false)
-                    {
-                        <RedirectToLogin />
-                    }
-                    else 
-                    {
-                        <div class="alert alert-warning">
-                            <p>
-                                You Dont Have Access To This Page ;/
-                            </p>
-                        </div>
-                    }
-                </NotAuthorized>
-            </AuthorizeRouteView>
-            <FocusOnNavigate RouteData="routeData" Selector="h1" />
-        </Found>
-    </Router>
+        <Router AppAssembly="typeof(Program).Assembly">
+            <Found Context="routeData">
+            <UserProvider>
+                <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+
+                    <NotAuthorized>
+
+                        @if (context.User?.Identity?.IsAuthenticated == false)
+                        {
+                            <RedirectToLogin />
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                <p>
+                                    You Dont Have Access To This Page ;/
+                                </p>
+                            </div>
+                        }
+                    </NotAuthorized>
+                </AuthorizeRouteView>
+            </UserProvider>
+              
+                <FocusOnNavigate RouteData="routeData" Selector="h1" />
+            </Found>
+        </Router>
+   
+ 
 </CascadingAuthenticationState>
-
 
