@@ -2,7 +2,7 @@
 
 namespace WebChatBlazor.Services.ChatServices;
 
-public class HomePageServcies
+public class HomePageServcies : IHomePageServcies
 {
 
     private readonly IClient _client;
@@ -13,10 +13,12 @@ public class HomePageServcies
     }
 
 
-    //public async Task<List<usersDto>> SerchUsers(string username)
-    //{
-    //    return null;
-    //}
+    public async Task<List<UserSearchDto>>  SerchUsers(string username)
+    {
+        var users = await _client.FindUsersAsync(username);
+        return users.ToList();
+
+    }
 
 
 }

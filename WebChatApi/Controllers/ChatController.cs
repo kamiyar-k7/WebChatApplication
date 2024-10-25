@@ -1,8 +1,7 @@
 ﻿using Application.Services.Interfaces;
 using Application.ViewModel_And_Dto.Dto.UserSide;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
+
 
 namespace WebChatApi.Controllers;
 
@@ -15,13 +14,34 @@ public class ChatController : ControllerBase
 
     #region Ctor
     private readonly IChatServices _chatservice;
-
-    public ChatController(IChatServices chatservice)
+    private readonly IUserServices _userservice;
+    public ChatController(IChatServices chatservice, IUserServices userServices)
     {
         _chatservice = chatservice;
+        _userservice = userServices;
     }
 
     #endregion
+
+    [HttpPost("[Action]/{UserName}")]
+    [ProducesResponseType( StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<UserSearchDto>>> FindUsers(string UserName)
+    {
+
+        try
+        {
+            var users = await _userservice.FindUsers(UserName);
+            return Ok(users);
+        }
+        catch (Exception ex)
+        {
+
+            Console.WriteLine(ex.Message);
+            return BadRequest(ex.Message);
+        }
+
+
+    }
 
 
     [HttpPost("[Action]/{ReceiverId}")]
@@ -29,6 +49,7 @@ public class ChatController : ControllerBase
     public async Task<IActionResult> SendMessage(int ReceiverId, MessageDto messageDto)
     {
         try
+        
         {
             await _chatservice.SendMessgae(messageDto);
             return Ok();
@@ -42,15 +63,15 @@ public class ChatController : ControllerBase
 
     }
 
-    [HttpGet("[Action]/{OtherUserId}")]
+    [HttpGet("[Action]/{OtherUser:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult> Chat(int OtherUserId )
+    public async Task<ActionResult<List<MessageDto>>> GetListOfMessages(int currenUser , int OtherUser)
     {
-        int currentuser = 1;
+      
 
         try
-        {
-            var message = await _chatservice.GeTlistOfMessages(currentuser, OtherUserId);
+        {   
+            var message = await _chatservice.GeTlistOfMessages(currenUser , OtherUser);
             return Ok(message);
 
         }
@@ -58,9 +79,9 @@ public class ChatController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
-        
 
-        
+
+
     }
 
 

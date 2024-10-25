@@ -1,4 +1,4 @@
-﻿@page "/chatpage/2"
+﻿@page "/chatpage/{id:int}"
 @layout ChatLayout
 @inject NavigationManager _navmanager;
 @inject UserProvider _userprovider;
@@ -27,7 +27,7 @@
         </MudItem>
 
         <MudItem>
-            <MudText Class="h6 fw-bold">User Name</MudText>
+            <MudText Class="h6 fw-bold">user Name</MudText>
             <MudText Class="fw-light">Online</MudText>
         </MudItem>
 
@@ -40,7 +40,73 @@
 
 </MudAppBar>
 
+<!-- chats -->
+<MudMainContent Class="h-100 overflow-hidden" Style="padding-bottom:110px;  padding-top:20px;" >
 
+
+    @if (ListOfMessages.Any() )
+    {
+        @foreach (var message in ListOfMessages)
+        {
+
+            @if (message.SenderId == currentUser.UserId)
+            {
+                <MudGrid Class="row d-flex m-1 flex-row-reverse p-1" Style=" padding-right:40px !important;">
+                    <MudItem xs="9"  Style="height:auto;" Class="d-flex flex-column text-end bg-primary rounded-5 m-1">
+                        <MudText Class="fw-bold text-white px-1 ">YOU</MudText>
+                        <MudDivider />
+                        <MudText Class="text-white p-2">
+                            <pre Style="white-space: pre-wrap; word-break: break-word; direction: @GetDirection(message.Content)" >@message.Content</pre>
+                        </MudText>
+
+                    </MudItem>
+                </MudGrid>
+            }
+
+            else
+            {
+                <MudGrid Class="row d-flex m-1">
+                    <MudItem xs="3" sm="1" >
+                        <MudImage Src="/Images/webicon.jpg"
+                                  Alt="User Profile"
+                                  ObjectFit="ObjectFit.Cover"
+                                  Fluid="true"
+                                  ObjectPosition="ObjectPosition.Center"
+                                  Class="rounded-circle bg-transparent" />
+                    </MudItem>
+
+
+                    <MudItem xs="8" sm="8" Style="height:auto;" Class="bg-secondary rounded-5 p-2 ">
+
+
+
+                        <MudText Class="fw-bold text-white bg-black" >@message.ResiverName</MudText>
+                        <MudDivider />
+                        <MudText Class="text-white p-2">
+                            <pre Style="white-space: pre-wrap; word-break: break-word; direction: @GetDirection(message.Content)">@message.Content</pre>
+                        </MudText>
+
+                    </MudItem>
+                </MudGrid>
+            }
+          
+        }
+    }
+    else
+    {
+        <MudGrid Class="d-flex align-items-center justify-content-center vh-100 overflow-hidden m-0">
+            <MudItem xs="12" Class="d-flex align-items-center justify-content-center text-center">
+                <MudText Class="text-white bg-dark">
+                    You Have No Messages Here
+                    <br />
+                    Send A Message To Start Chat!
+                </MudText>
+            </MudItem>
+        </MudGrid>
+    }
+
+
+</MudMainContent>
 
 <!--Bottom app bar-->
 <MudAppBar Bottom="true" Fixed="true" Elevation="1" Style="height:100px;" Class="d-flex justify-content-center bg-dark">
@@ -63,14 +129,14 @@
 
             </MudItem>
 
-            <MudItem xs="2" Class="d-flex justify-content-end">
+            <MudItem xs="2" Class="d-flex justify-content-center">
                 <MudButton ButtonType="ButtonType.Submit"
                            Variant="Variant.Filled"
                            Color="Color.Primary"
                            EndIcon="@Icons.Material.Filled.Send"
                            IconColor="Color.Info"
-                           Class="w-100 white-text"
-                           Style="height: 40px; ">
+                           Class=" white-text"
+                           @* Style="height: 40px; width:50%; "> *@
                 </MudButton>
             </MudItem>
 
@@ -80,36 +146,50 @@
 
 </MudAppBar>
 
+<style>
+    .rtl-text {
+        direction: rtl;
+        text-align: right;
+    }
 
+    .ltr-text {
+        direction: ltr;
+        text-align: left;
+    }
+
+</style>
 
 
 @code {
 
     UserContext currentUser { get; set; }
+    private List<MessageDto> ListOfMessages = new();
+    [Parameter]
+    public int id { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        // get and set current user
         currentUser = await _userprovider.SetCurrentUserFromClaims();
-        Console.WriteLine($"current username {currentUser.UserName} Id : {currentUser.UserId}");
+
+        //get other user
+
+
+        // get messages
+        ListOfMessages = await _chatservice.GetListOfMessages(currentUser.UserId, id);
+
         await base.OnInitializedAsync();
     }
 
-    private void BackToHome()
-    {
-        _navmanager.NavigateTo("/");
-    }
 
-
-    private int ResiverId;
+    //send meesage
     private MessageDto model = new MessageDto();
-
-
     private async Task SendMessage()
     {
         try
         {
             model.SenderId = currentUser.UserId;
-            model.ResiverId = 2;
+            model.ResiverId = id;
             await _chatservice.SendMessage(model);
         }
 
@@ -118,6 +198,19 @@
 
             Console.WriteLine(ex.Message);
         }
+    }
+
+
+
+    private string GetDirection(string content)
+    {
+        // Basic check: if the content has Persian characters, set RTL direction
+        return content.Any(c => char.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.OtherLetter) ? "rtl" : "ltr";
+    }
+
+    private void BackToHome()
+    {
+        _navmanager.NavigateTo("/");
     }
 }
 

@@ -25,7 +25,7 @@ public class ChatServices : IChatServices
             Content = message.Content,
             ResiverId = message.ResiverId,
             SenderId = message.SenderId,
-            Timestamp  = DateTime.UtcNow,
+            Timestamp = DateTime.UtcNow,
 
         };
 
@@ -33,31 +33,33 @@ public class ChatServices : IChatServices
 
     }
 
-    public async Task<List<MessageDto>> GeTlistOfMessages(int currentUser , int OtherUser)
+    public async Task<List<MessageDto>> GeTlistOfMessages(int currenUser, int OtherUser)
     {
-        
-        var messages = await _chatRepo.GetMessagesBetweenUsers(currentUser, OtherUser);
+
+        var AllMessages = await _chatRepo.GetMessagesBetweenUsers(currenUser, OtherUser);
 
         List<MessageDto> messagelist = new List<MessageDto>();
 
-        foreach (var message in messages)
+        foreach (var message in AllMessages)
         {
             MessageDto messageDto = new MessageDto()
             {
+                Id = message.Id,
                 Content = message.Content,
                 Timestamp = message.Timestamp,
-                SenderId= message.SenderId,
+                SenderId = message.SenderId,
                 ResiverId = message.ResiverId,
-             
-                
+                ResiverName = message.Resiver.UserName,
+                SenderName = message.Sender.UserName,
+
             };
 
-            messagelist.Add(messageDto);    
+            messagelist.Add(messageDto);
 
         }
-               
+
         return messagelist;
-        
+
     }
     #endregion
 

@@ -37,6 +37,7 @@ builder.Services.AddScoped<AuthenticationStateProvider>(p => p.GetRequiredServic
 //Servcies
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IPrivateChatService, PrivateChatServices>();
+builder.Services.AddScoped<IHomePageServcies, HomePageServcies>();
 #endregion
 
 builder.Services.AddServerSideBlazor()

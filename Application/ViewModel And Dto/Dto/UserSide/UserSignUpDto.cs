@@ -1,7 +1,7 @@
 ﻿
 namespace Application.ViewModel_And_Dto.Dto.UserSide;
 
-public class UserSignUpDto
+public record UserSignUpDto
 {
 
     public string? UserName { get; set; }

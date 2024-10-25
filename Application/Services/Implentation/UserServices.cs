@@ -19,13 +19,14 @@ namespace Application.Services.Implentation;
 
 public class UserServices : IUserServices
 {
+    #region Ctor
+
     private readonly IConfiguration _configuration;
     private readonly IMapper _mapper;
     private readonly IValidator<object> _validator;
 
     private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
-    #region Ctor
     public UserServices(IConfiguration configuration,
         IMapper mapper,
         IValidator<object> validator,
@@ -41,7 +42,7 @@ public class UserServices : IUserServices
 
     #endregion
 
-
+    #region Auth services
     public async Task SignUp(UserSignUpDto userDto)
     {
         var res = await _validator.ValidateAsync(userDto);
@@ -85,7 +86,7 @@ public class UserServices : IUserServices
 
 
     }
-   
+
     public async Task<string> SignIn(UserSignInDto userDto)
     {
 
@@ -95,7 +96,7 @@ public class UserServices : IUserServices
         if (!res.IsValid)
         {
             var errorgroups = res.Errors.GroupBy(x => x.PropertyName).ToList();
-            var Errors = errorgroups.Select(x => new 
+            var Errors = errorgroups.Select(x => new
             {
                 propertyname = x.Key,
                 errors = x.Select(x => x.ErrorMessage).ToList()
@@ -109,23 +110,20 @@ public class UserServices : IUserServices
         #endregion
 
 
-        var user = await  _userRepository.SignIn(userDto.UserEmail , userDto.Password);
+        var user = await _userRepository.SignIn(userDto.UserEmail, userDto.Password);
 
-        if(user == null)
+        if (user == null)
         {
             //throw new Exception("The Emial Or Password Are Incorrect");
             return null;
         }
 
         string token = await GenerateToken(user);
-      
+
         var serializedtoken = MyJsonSerial.Serialize(token);
         return serializedtoken;
 
     }
-
-
-
 
     private async Task<string> GenerateToken(User user)
     {
@@ -155,5 +153,18 @@ public class UserServices : IUserServices
         return new JwtSecurityTokenHandler().WriteToken(token);
 
     }
+    #endregion
+
+
+    public async Task<List<UserSearchDto>> FindUsers(string UserName)
+    {
+        var users = await _userRepository.FindUsers(UserName);
+
+        List<UserSearchDto> mapped = _mapper.Map<List<UserSearchDto>>(users);
+
+        return mapped;
+
+    }
+
 
 }

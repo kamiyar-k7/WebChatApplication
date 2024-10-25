@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
-@inject
+@inject NavigationManager _navmanager
+@inject IHomePageServcies _homeservices
+
 <MudThemeProvider />
 <MudPopoverProvider />
 <MudDialogProvider />
@@ -9,7 +11,7 @@
 <MudLayout>
 
 
-    <MudAppBar >
+    <MudAppBar>
         <MudGrid Class="d-flex align-items-center">
             <MudItem>
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@(() => DrawerButton())" />
@@ -19,14 +21,14 @@
             <MudSpacer /> <!-- This will push the next MudItem to the right -->
 
             <MudItem Class="d-flex align-items-center justify-content-end">
-                <MudTextField @bind-Value="search"
+                <MudTextField @bind-Value="UserName"
                               Placeholder="Search UserNames"
                               Variant="Variant.Outlined"
                               Adornment="Adornment.End"
                               AdornmentIcon="@Icons.Material.Filled.Search"
                               OnAdornmentClick="SearchUsers"
                               Class="white-text"
-                               />
+                              />
             </MudItem>
         </MudGrid>
     </MudAppBar>
@@ -45,36 +47,56 @@
 
                 <MudNavLink Href="/" Match="NavLinkMatch.Prefix">Settings</MudNavLink>
                 <MudNavLink Href="/" Match="NavLinkMatch.Prefix" Class="text-danger">LogOut</MudNavLink>
-            
+
             </MudNavGroup>
 
-            <MudNavLink  Match="NavLinkMatch.Prefix">Theme</MudNavLink>
+            <MudNavLink Match="NavLinkMatch.Prefix">Theme</MudNavLink>
 
             <MudNavLink Href="/" Match="NavLinkMatch.Prefix">About</MudNavLink>
 
         </MudNavMenu>
     </MudDrawer>
 
+    @if (!string.IsNullOrEmpty(UserName) )
+    {
+        <SearchUsers Model="@model" />
+    }
+    else
+    {
+        <MudMainContent Class="bg-dark">
+            @Body
+        </MudMainContent>
+    }
 
-    <MudMainContent Class="bg-dark">
-        @Body
-    </MudMainContent>
+
 
 </MudLayout>
 
 @code {
-    public string search = string.Empty;
+
+    public string UserName = string.Empty;
     bool opendrawer = false;
+    private int id;
+    private List<UserSearchDto> model = new();
 
     void DrawerButton()
     {
         opendrawer = !opendrawer;
     }
 
-    void SearchUsers()
+    private async Task SearchUsers()
+    {
+        model = await _homeservices.SerchUsers(UserName);
+      
+    }
+
+    void OpenChat(int id)
     {
 
+        _navmanager.NavigateTo($"chatpage/{id}");
     }
+
+
 }
 
 

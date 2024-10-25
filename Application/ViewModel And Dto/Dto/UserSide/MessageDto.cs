@@ -3,7 +3,7 @@ using Doamin.Entities.UserEntities;
 
 namespace Application.ViewModel_And_Dto.Dto.UserSide;
 
-public class MessageDto
+public record MessageDto
 {
 
     

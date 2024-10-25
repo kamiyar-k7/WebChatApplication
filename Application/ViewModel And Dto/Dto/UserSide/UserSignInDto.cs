@@ -2,7 +2,7 @@
 
 namespace Application.ViewModel_And_Dto.Dto.UserSide;
 
-public class UserSignInDto
+public record UserSignInDto
 {
 
     public string? UserEmail { get; set; }
