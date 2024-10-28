@@ -1,23 +1,27 @@
 ﻿
 using Application.Services.Interfaces;
+using Application.SignalR;
 using Application.ViewModel_And_Dto.Dto.UserSide;
 using Doamin.Entities.ChatEntites;
 using Doamin.IRepository.ChatPart;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Application.Services.Implentation;
 
 public class ChatServices : IChatServices
 {
-    private readonly IChatRepository _chatRepo;
+
 
     #region ctor
-
+    private readonly IChatRepository _chatRepo;
+   
     public ChatServices(IChatRepository chatRepo)
     {
         _chatRepo = chatRepo;
     }
+    #endregion
 
-    public async Task SendMessgae(MessageDto message)
+    public async Task SaveMessage(MessageDto message)
     {
 
         var newmessage = new Messages()
@@ -61,7 +65,7 @@ public class ChatServices : IChatServices
         return messagelist;
 
     }
-    #endregion
+
 
 
 

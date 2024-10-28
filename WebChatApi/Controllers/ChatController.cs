@@ -1,6 +1,8 @@
 ﻿using Application.Services.Interfaces;
+using Application.SignalR;
 using Application.ViewModel_And_Dto.Dto.UserSide;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 
 namespace WebChatApi.Controllers;
@@ -51,7 +53,7 @@ public class ChatController : ControllerBase
         try
         
         {
-            await _chatservice.SendMessgae(messageDto);
+            await _chatservice.SaveMessage(messageDto);
             return Ok();
         }
         catch (Exception ex)
@@ -62,16 +64,17 @@ public class ChatController : ControllerBase
 
 
     }
-
+    
     [HttpGet("[Action]/{OtherUser:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<List<MessageDto>>> GetListOfMessages(int currenUser , int OtherUser)
     {
-      
 
+     
         try
-        {   
-            var message = await _chatservice.GeTlistOfMessages(currenUser , OtherUser);
+        {
+
+            var message = await _chatservice.GeTlistOfMessages(currenUser, OtherUser);
             return Ok(message);
 
         }

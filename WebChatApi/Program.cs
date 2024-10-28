@@ -1,6 +1,7 @@
 using Application.MapConfig;
 using Application.Services.Implentation;
 using Application.Services.Interfaces;
+using Application.SignalR;
 using Application.Validation;
 using Application.ViewModel_And_Dto.Dto.UserSide;
 using Doamin.IRepository.ChatPart;
@@ -31,10 +32,31 @@ builder.Host.UseSerilog((context, conf) => conf.WriteTo.Console().ReadFrom.Confi
 
 #endregion
 
+#region Cors
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("https://localhost:7019/").
+          AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials()
+              .SetIsOriginAllowed(origin => true);
+    });
+});
+
+
+
+#endregion
+
 #region Mapper
 builder.Services.AddAutoMapper(typeof(MapperConfig));
 #endregion
 
+#region MyRegion
+builder.Services.AddSignalR();
+builder.Services.AddScoped<ChatSignalR>();
+#endregion
 
 #region Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -83,17 +105,16 @@ builder.Services.AddAuthentication(options =>
 
 
 
+
+
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-
-
-
-
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -102,11 +123,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors();
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<ChatSignalR>("/ChatHub");
+
 
 app.Run();

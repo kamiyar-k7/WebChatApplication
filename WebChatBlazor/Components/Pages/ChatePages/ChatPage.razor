@@ -41,10 +41,10 @@
 </MudAppBar>
 
 <!-- chats -->
-<MudMainContent Class="h-100 overflow-hidden" Style="padding-bottom:110px;  padding-top:20px;" >
+<MudMainContent Class="h-100 overflow-hidden" Style="padding-bottom:110px;  padding-top:20px;">
 
 
-    @if (ListOfMessages.Any() )
+    @if (ListOfMessages.Any())
     {
         @foreach (var message in ListOfMessages)
         {
@@ -52,11 +52,11 @@
             @if (message.SenderId == currentUser.UserId)
             {
                 <MudGrid Class="row d-flex m-1 flex-row-reverse p-1" Style=" padding-right:40px !important;">
-                    <MudItem xs="9"  Style="height:auto;" Class="d-flex flex-column text-end bg-primary rounded-5 m-1">
+                    <MudItem xs="9" Style="height:auto;" Class="d-flex flex-column text-end bg-primary rounded-5 m-1">
                         <MudText Class="fw-bold text-white px-1 ">YOU</MudText>
                         <MudDivider />
                         <MudText Class="text-white p-2">
-                            <pre Style="white-space: pre-wrap; word-break: break-word; direction: @GetDirection(message.Content)" >@message.Content</pre>
+                            <pre Style="white-space: pre-wrap; word-break: break-word; direction: @GetDirection(message.Content)">@message.Content</pre>
                         </MudText>
 
                     </MudItem>
@@ -66,7 +66,7 @@
             else
             {
                 <MudGrid Class="row d-flex m-1">
-                    <MudItem xs="3" sm="1" >
+                    <MudItem xs="3" sm="1">
                         <MudImage Src="/Images/webicon.jpg"
                                   Alt="User Profile"
                                   ObjectFit="ObjectFit.Cover"
@@ -80,7 +80,7 @@
 
 
 
-                        <MudText Class="fw-bold text-white bg-black" >@message.ResiverName</MudText>
+                        <MudText Class="fw-bold text-white">@message.ResiverName</MudText>
                         <MudDivider />
                         <MudText Class="text-white p-2">
                             <pre Style="white-space: pre-wrap; word-break: break-word; direction: @GetDirection(message.Content)">@message.Content</pre>
@@ -89,7 +89,7 @@
                     </MudItem>
                 </MudGrid>
             }
-          
+
         }
     }
     else
@@ -135,8 +135,11 @@
                            Color="Color.Primary"
                            EndIcon="@Icons.Material.Filled.Send"
                            IconColor="Color.Info"
-                           Class=" white-text"
-                           @* Style="height: 40px; width:50%; "> *@
+                           Class=" white-text w-100">
+
+                </MudButton>
+                <MudButton>
+
                 </MudButton>
             </MudItem>
 
@@ -167,22 +170,45 @@
     [Parameter]
     public int id { get; set; }
 
+    private string server = "https://localhost:7019/";
+    HubConnection HubConnection;
+
     protected override async Task OnInitializedAsync()
     {
-        // get and set current user
+
+        //get current user
         currentUser = await _userprovider.SetCurrentUserFromClaims();
 
-        //get other user
 
-
-        // get messages
         ListOfMessages = await _chatservice.GetListOfMessages(currentUser.UserId, id);
 
+
+        HubConnection = new HubConnectionBuilder()
+            .WithUrl("https://localhost:7019/ChatHub")
+            .WithAutomaticReconnect()
+            .Build();
+
+        // Listen for incoming messages
+        HubConnection.On<MessageDto>("ReceiveMessage", async message =>
+        {
+            await InvokeAsync( () =>
+            {
+
+                ListOfMessages.Add(message);
+                StateHasChanged();
+                
+            });
+        });
+
+        await HubConnection.StartAsync();
+        Console.WriteLine("connected");
+       
         await base.OnInitializedAsync();
     }
 
 
     //send meesage
+
     private MessageDto model = new MessageDto();
     private async Task SendMessage()
     {
@@ -190,7 +216,12 @@
         {
             model.SenderId = currentUser.UserId;
             model.ResiverId = id;
-            await _chatservice.SendMessage(model);
+
+            await HubConnection.SendAsync("SendMessage", model);
+
+            // Clear the input after sending the message
+            model.Content = string.Empty;
+
         }
 
         catch (ApiException ex)
@@ -212,6 +243,8 @@
     {
         _navmanager.NavigateTo("/");
     }
+
+   
 }
 
 
