@@ -62,6 +62,8 @@ builder.Services.AddScoped<ChatSignalR>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
+builder.Services.AddScoped<IConverstationRepository, ConverstationRepository>();
+
 
 #endregion
 

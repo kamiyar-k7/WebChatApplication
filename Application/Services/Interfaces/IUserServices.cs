@@ -12,5 +12,5 @@ public interface IUserServices
     #endregion
 
 
-    Task<List<UserSearchDto>> FindUsers(string UserName);
+    Task<List<OtherUserDto>> FindUsers(string UserName);
 }

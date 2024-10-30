@@ -3,13 +3,16 @@ using System.Security.Claims;
 
 namespace WebChatBlazor.Services.AuthServices;
 
-public class UserProvider
+public class UserProvider : IUserProvider
 {
+    #region Ctor
+
     private readonly AuthStateProvider _stateProvider;
     public UserProvider(AuthStateProvider authStateProvider)
     {
             _stateProvider = authStateProvider; 
     }
+    #endregion
 
     public async Task<UserContext> SetCurrentUserFromClaims()
     {
@@ -36,9 +39,10 @@ public class UserProvider
         }
     }
 }
+
 public class UserContext
 {
     public int UserId { get; set; }
     public string UserName { get; set; }
-    // You can add more user-related properties if needed.
+
 }

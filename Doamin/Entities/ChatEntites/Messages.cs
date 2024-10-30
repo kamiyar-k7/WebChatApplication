@@ -1,6 +1,5 @@
 ﻿using Doamin.Entities.UserEntities;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Collections.Generic;
+
 
 
 
@@ -22,6 +21,9 @@ public class Messages
 
     public DateTime Timestamp { get; set; }
 
+
+    //rels
+    public Converstation Converstation { get; set; }
 
 }
 

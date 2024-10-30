@@ -25,6 +25,8 @@ public class ChatDbContext : DbContext
 
     //  chats
     public DbSet<Messages> Messages { get; set; }
+    public DbSet<Converstation> converstations { get; set; }
+
 
 
 
@@ -45,6 +47,23 @@ public class ChatDbContext : DbContext
             message.HasOne(m => m.Resiver)
                 .WithMany()  // No navigation property in User for messages
                 .HasForeignKey(m => m.ResiverId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading deletes
+        });
+
+        modelBuilder.Entity<Converstation>(coverstation =>
+        {
+
+
+            // Configure Sender relationship
+            coverstation.HasOne(m => m.User1)
+                .WithMany()  // No navigation property in User for messages
+                .HasForeignKey(m => m.User1Id)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading deletes
+
+            // Configure Sender relationship
+            coverstation.HasOne(m => m.User2)
+                .WithMany()  // No navigation property in User for messages
+                .HasForeignKey(m => m.User2Id)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascading deletes
         });
 

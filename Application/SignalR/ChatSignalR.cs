@@ -28,7 +28,14 @@ public class ChatSignalR : Hub
         await _chatservices.SaveMessage(messageDto);
 
         // Broadcast the message to the clients
-        await Clients.All.SendAsync("ReceiveMessage", messageDto);
+        await Clients.All.SendAsync("ReceiveMessage" , messageDto);
+    }
+
+    public async Task AddConversation(int currentUser , int OtherUser)
+    {
+        await _chatservices.CreateConverstation(currentUser, OtherUser);
+
+        await Clients.All.SendAsync("GetConversations" , currentUser , OtherUser);
     }
 
 

@@ -156,11 +156,11 @@ public class UserServices : IUserServices
     #endregion
 
 
-    public async Task<List<UserSearchDto>> FindUsers(string UserName)
+    public async Task<List<OtherUserDto>> FindUsers(string UserName)
     {
         var users = await _userRepository.FindUsers(UserName);
 
-        List<UserSearchDto> mapped = _mapper.Map<List<UserSearchDto>>(users);
+        List<OtherUserDto> mapped = _mapper.Map<List<OtherUserDto>>(users);
 
         return mapped;
 

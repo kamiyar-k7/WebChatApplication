@@ -14,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<UserProvider>();
+
 
 
 // Connect Api
@@ -32,12 +32,14 @@ builder.Services.AddSingleton<JwtSecurityTokenHandler>();
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, BlazorAuthorizationMiddlewareResultHandler>();
 builder.Services.AddScoped<AuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(p => p.GetRequiredService<AuthStateProvider>());
-
+//
+builder.Services.AddScoped<IUserProvider, UserProvider>();
 
 //Servcies
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IPrivateChatService, PrivateChatServices>();
 builder.Services.AddScoped<IHomePageServcies, HomePageServcies>();
+
 #endregion
 
 builder.Services.AddServerSideBlazor()

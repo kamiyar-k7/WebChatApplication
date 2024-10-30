@@ -4,6 +4,7 @@ namespace WebChatBlazor.Services.ChatServices;
 
 public interface IHomePageServcies
 {
-    Task<List<UserSearchDto>> SerchUsers(string username);
-
+    Task<List<OtherUserDto>> SerchUsers(string username);
+    Task<List<OtherUserDto>> GetConversations();
+    
 }

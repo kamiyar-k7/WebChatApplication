@@ -11,7 +11,7 @@ public class MapperConfig : Profile
     public MapperConfig()
     {
         CreateMap<User, UserSignUpDto>().ReverseMap();
-        CreateMap<User, UserSearchDto>().ReverseMap();
+        CreateMap<User, OtherUserDto>().ReverseMap();
     }
 
 }

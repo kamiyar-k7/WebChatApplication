@@ -1,7 +1,7 @@
 ﻿@page "/chatpage/{id:int}"
 @layout ChatLayout
 @inject NavigationManager _navmanager;
-@inject UserProvider _userprovider;
+@inject IUserProvider _userprovider;
 @inject IPrivateChatService _chatservice
 
 <!--top app bar-->
@@ -164,14 +164,18 @@
 
 
 @code {
+    private bool exist = false;
 
     UserContext currentUser { get; set; }
+
     private List<MessageDto> ListOfMessages = new();
+
+
     [Parameter]
     public int id { get; set; }
 
-    private string server = "https://localhost:7019/";
-    HubConnection HubConnection;
+
+    HubConnection? HubConnection;
 
     protected override async Task OnInitializedAsync()
     {
@@ -179,9 +183,11 @@
         //get current user
         currentUser = await _userprovider.SetCurrentUserFromClaims();
 
+        //check for convesation existness
+        exist = await _chatservice.IsConversationExist(currentUser.UserId, id);
 
-        ListOfMessages = await _chatservice.GetListOfMessages(currentUser.UserId, id);
 
+        ListOfMessages = exist ? await _chatservice.GetListOfMessages(currentUser.UserId, id) : new();
 
         HubConnection = new HubConnectionBuilder()
             .WithUrl("https://localhost:7019/ChatHub")
@@ -191,36 +197,47 @@
         // Listen for incoming messages
         HubConnection.On<MessageDto>("ReceiveMessage", async message =>
         {
-            await InvokeAsync( () =>
+            await InvokeAsync(() =>
             {
 
                 ListOfMessages.Add(message);
                 StateHasChanged();
-                
+
             });
         });
 
         await HubConnection.StartAsync();
-        Console.WriteLine("connected");
-       
+
+
         await base.OnInitializedAsync();
+
+
+
+
+
     }
 
 
     //send meesage
 
     private MessageDto model = new MessageDto();
+
     private async Task SendMessage()
     {
         try
         {
             model.SenderId = currentUser.UserId;
             model.ResiverId = id;
+            if (!exist)
+            {
+                await HubConnection?.SendAsync("AddConversation", currentUser.UserId, id);
+                exist = true;
+            }
+
 
             await HubConnection.SendAsync("SendMessage", model);
-
-            // Clear the input after sending the message
             model.Content = string.Empty;
+
 
         }
 
@@ -244,7 +261,7 @@
         _navmanager.NavigateTo("/");
     }
 
-   
+
 }
 
 
