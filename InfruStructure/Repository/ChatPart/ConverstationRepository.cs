@@ -10,8 +10,8 @@ namespace InfruStructure.Repository.ChatPart;
 public class ConverstationRepository : IConverstationRepository
 {
 
-	#region Ctor
-	private readonly ChatDbContext _Context;
+    #region Ctor
+    private readonly ChatDbContext _Context;
 
     public ConverstationRepository(ChatDbContext context)
     {
@@ -19,30 +19,61 @@ public class ConverstationRepository : IConverstationRepository
     }
 
     #endregion
-            
-            
-    public async Task<bool> IsConverstationExist(int user1Id , int user2Id)
+
+
+    public async Task<int> GetCoversationId(int user1Id, int user2Id)
     {
 
-        return await _Context.converstations.AnyAsync(c=> (c.User1Id == user1Id && c.User2Id == user2Id) ||(c.User1Id == user2Id && c.User2Id == user1Id));
+        return await _Context.converstations.Where(c => (c.User1Id == user1Id && c.User2Id == user2Id) || (c.User1Id == user2Id && c.User2Id == user1Id)).Select(x => x.Id).FirstOrDefaultAsync();
 
     }
 
-    public async Task CreateConverstation(Converstation converstation)
+    public async Task<int> CreateConverstation(Converstation converstation)
     {
 
         await _Context.converstations.AddAsync(converstation);
         await _Context.SaveChangesAsync();
+        return converstation.Id;
 
     }
 
-    public async Task<List<Messages>> GetMessageConverstation(int user1Id , int user2Id)
+    public async Task<List<Messages>> GetMessageConverstation(int conid)
     {
 
-        return await _Context.converstations.Where(c => (c.User1Id == user1Id && c.User2Id == user2Id) ||
-        (c.User1Id == user2Id && c.User2Id == user1Id)
-        ).SelectMany(x => x.messages).ToListAsync();
+        //return await _Context.converstations.Where(c => (c.User1Id == user1Id && c.User2Id == user2Id) ||
+        //(c.User1Id == user2Id && c.User2Id == user1Id)
+        //).SelectMany(x => x.messages).ToListAsync();
 
+        return await _Context.Messages.Where(x => x.ConverstationId == conid).Include(x => x.Sender).Select(x => new Messages
+        {
+            Id = x.Id,
+            Content = x.Content,
+            ConverstationId = conid,
+            Timestamp = x.Timestamp,
+            Sender = new User
+            {
+                UserEmail = x.Sender.UserEmail,
+                UserName = x.Sender.UserName,
+                CreatedAt = DateTime.Now,
+                RoleName = x.Sender.RoleName,
+                Id = x.Id,
+                
+            }, 
+            SenderId = x.SenderId,
+
+            Resiver = new User
+            {
+                UserEmail = x.Sender.UserEmail,
+                UserName = x.Sender.UserName,
+                CreatedAt = DateTime.Now,
+                RoleName = x.Sender.RoleName,
+                Id = x.Id,
+            },
+            ResiverId = x.ResiverId
+
+
+
+        }).ToListAsync();
     }
 
     public async Task<List<int>> GetIdOFOtherUserInConversation(int userId)
@@ -51,7 +82,6 @@ public class ConverstationRepository : IConverstationRepository
                              .Where(c => c.User1Id == userId || c.User2Id == userId)
                              .Select(c => c.User1Id == userId ? c.User2Id : c.User1Id)
                              .ToListAsync();
-
 
     }
 

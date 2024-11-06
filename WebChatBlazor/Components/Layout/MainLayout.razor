@@ -1,11 +1,14 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager _navmanager
 @inject IHomePageServcies _homeservices
+@inject AuthStateProvider _state
 
 <MudThemeProvider />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
+
+
 
 
 <MudLayout>
@@ -15,22 +18,28 @@
         <MudGrid Class="d-flex align-items-center">
             <MudItem>
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@(() => DrawerButton())" />
-                Web Chat
+                Web Chat 
+            
             </MudItem>
 
-            <MudSpacer /> <!-- This will push the next MudItem to the right -->
+            <MudSpacer /> 
 
             <MudItem Class="d-flex align-items-center justify-content-end">
-                <MudTextField @bind-Value="UserName"
-                              Placeholder="Search UserNames"
+
+                <MudTextField Value="UserName"
+                              ValueChanged="@((string userName) => SerchUsers(userName))"
+                              Immediate="true"
+                              Placeholder="Search For UserNames"
                               Variant="Variant.Outlined"
                               Adornment="Adornment.End"
                               AdornmentIcon="@Icons.Material.Filled.Search"
-                              OnAdornmentClick="SearchUsers"
-                              Class="white-text"
-                              />
+                              Class="white-text" />
             </MudItem>
+           
+
+
         </MudGrid>
+
     </MudAppBar>
 
 
@@ -57,9 +66,9 @@
         </MudNavMenu>
     </MudDrawer>
 
-    @if (!string.IsNullOrEmpty(UserName) )
+    @if (!string.IsNullOrEmpty(UserName))
     {
-        <SearchUsers Model="@model" />
+        <SearchUsers Model="@model" message="@message" />
     }
     else
     {
@@ -69,32 +78,78 @@
     }
 
 
-
 </MudLayout>
 
 @code {
 
-    public string UserName = string.Empty;
+
+
+    HubConnection _connection;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        _connection = new HubConnectionBuilder().WithUrl("https://localhost:7019/ChatHub").WithAutomaticReconnect().Build();
+
+        _connection.On<List<OtherUserDto>>("GetSearch", async users =>
+        {
+
+            await InvokeAsync(() =>
+            {
+                if (users.Count > 0)
+                {
+                    model = users;
+                    message = string.Empty;
+                  
+                }
+                else
+                {
+                    message = "There is no user with this username";
+
+                  
+                }
+                StateHasChanged();
+            });
+        });
+
+        await _connection.StartAsync();
+
+    }
+
+    public string UserName { get; set; } = string.Empty;
+    private string message { get; set; } = string.Empty;
+   
+    private async Task SerchUsers(string userName)
+    {
+        UserName = userName;   
+        await _connection.SendAsync("SearchUsers", UserName);   
+
+    }
+
+
     bool opendrawer = false;
     private int id;
-    private List<OtherUserDto> model = new();
+    private List<OtherUserDto> model = new List<OtherUserDto>();
 
     void DrawerButton()
     {
         opendrawer = !opendrawer;
     }
 
-    private async Task SearchUsers()
-    {
-        model = await _homeservices.SerchUsers(UserName);
-      
-    }
+
+
+
+
+   
 
     void OpenChat(int id)
     {
 
         _navmanager.NavigateTo($"chatpage/{id}");
     }
+
+
+
 
 
 }

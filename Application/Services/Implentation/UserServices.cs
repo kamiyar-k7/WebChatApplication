@@ -166,5 +166,16 @@ public class UserServices : IUserServices
 
     }
 
+    public async Task<OtherUserDto> GetOtheUserDetails(int id)
+    {
+        var user = await _userRepository.GetOtherUserDetails(id);
+
+        var mapped = _mapper.Map<OtherUserDto>(user);
+
+        return mapped;
+
+       
+    }
+
 
 }

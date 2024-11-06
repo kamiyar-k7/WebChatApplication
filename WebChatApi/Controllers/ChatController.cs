@@ -1,4 +1,5 @@
-﻿using Application.Services.Interfaces;
+﻿using Application.Serilizer;
+using Application.Services.Interfaces;
 using Application.ViewModel_And_Dto.Dto.UserSide;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,6 +43,22 @@ public class ChatController : ControllerBase
 
     }
 
+    [HttpGet("[Action]/{Id:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult<OtherUserDto>> GetOtherUserDetails(int Id)
+    {
+        try
+        {
+            OtherUserDto user = await _userservice.GetOtheUserDetails(Id);
+            return Ok(user);
+
+        }
+        catch (Exception ex)
+        {
+
+            return BadRequest(ex.Message);
+        }
+    }
 
     [HttpPost("[Action]/{ReceiverId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -67,12 +84,12 @@ public class ChatController : ControllerBase
 
     [HttpGet("[Action]/{user2Id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<bool>> IsConverstationExist(int user1Id, int user2Id)
+    public async Task<ActionResult<int>> IsConverstationExist(int user1Id, int user2Id)
     {
 
         try
         {
-            var res = await _chatservice.IsCoverstationExist(user1Id, user2Id);
+            var res = await _chatservice.GetConversationId(user1Id, user2Id);
             return Ok(res);
 
         }
@@ -86,14 +103,15 @@ public class ChatController : ControllerBase
 
 
     [HttpPost("[Action]/{user2Id}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> CreateConverstation(int  user1Id , int user2Id)
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    public async Task<ActionResult<int>> CreateConverstation(int user1Id, int user2Id)
     {
 
         try
         {
-            await _chatservice.CreateConverstation(user1Id , user2Id);
-            return Ok();
+            var id = await _chatservice.CreateConverstation(user1Id, user2Id);
+
+            return CreatedAtAction(nameof(CreateConverstation), id);
 
         }
         catch (Exception ex)
@@ -123,13 +141,14 @@ public class ChatController : ControllerBase
 
     [HttpGet("[Action]/{user2Id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<List<MessageDto>>> GetListOfMessages(int user1Id, int user2Id)
+    public async Task<ActionResult<List<MessageDto>>> GetListOfMessages(int conid)
     {
 
         try
         {
 
-            var message = await _chatservice.GetConverstationMessages(user1Id, user2Id);
+            var message = await _chatservice.GetConverstationMessages(conid);
+
             return Ok(message);
 
         }

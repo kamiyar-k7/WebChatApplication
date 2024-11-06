@@ -1,18 +1,24 @@
 ﻿@page "/"
+@using System.Security.Claims
 @layout MainLayout
 @attribute [Authorize]
 @inject NavigationManager _navmanager;
 @inject IHomePageServcies _homepageservcies;
+@inject AuthStateProvider _state
 
 
 <MudItem Class="row overflow-hidden">
 
     <!--1-->
- 
-    @if (model.Any())
+    @if (model.Any() && model != null)
     {
         @foreach (var user in model)
         {
+            if(user.Id == CurrntUserId)
+            {
+                user.UserName = "Saved Messages";
+            }
+
             <MudButton OnClick="@(() => OpenChat(user.Id))" sm="12" Class="container-fluid overflow-hidden white-text p-1  d-flex align-items-center justify-content-start">
 
                 <MudImage Src="/Images/webicon.jpg"
@@ -47,8 +53,8 @@
     }
 
 
-       
-  
+
+
 </MudItem>
 
 
@@ -57,46 +63,51 @@
 
 @code {
 
-    List<OtherUserDto> model = new List<OtherUserDto>();
-
+    List<OtherUserDto?> model { get; set; } = new List<OtherUserDto?>();
+    private int CurrntUserId;
     HubConnection? _connection;
 
-    protected override async void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        model = await _homepageservcies.GetConversations();
+        var claims = await _state.GetClaims();
+        CurrntUserId = int.Parse(claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value);
 
-        //signalR
+
+
+        model = await _homepageservcies.GetConversations(CurrntUserId);
+
+
+
+        #region SignalR
         _connection = new HubConnectionBuilder().
         WithUrl("https://localhost:7019/ChatHub").
         WithAutomaticReconnect().Build();
 
-
-        _connection.On<OtherUserDto>("GetConversations", async con =>
+        _connection.On("GetConversations", async () =>
         {
-            await InvokeAsync(() =>
-            {
-                model.Add(con);
-                StateHasChanged();
-
-            });
-
+            await InvokeAsync(async () =>
+                {
+                    model = await _homepageservcies.GetConversations(CurrntUserId);
+                    StateHasChanged();
+                });
         });
+
 
         await _connection.StartAsync();
 
+        #endregion
     }
 
 
 
-   
     void OpenChat(int otheruserid)
     {
-      
+
         _navmanager.NavigateTo($"chatpage/{otheruserid}");
     }
 
 
-  
+
 }
 
 

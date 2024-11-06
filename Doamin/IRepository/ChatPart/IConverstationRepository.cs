@@ -7,11 +7,11 @@ namespace Doamin.IRepository.ChatPart;
 public interface IConverstationRepository
 {
 
-    Task<bool> IsConverstationExist(int user1Id, int user2Id);
+    Task<int> GetCoversationId(int user1Id, int user2Id);
 
-    Task CreateConverstation(Converstation converstation);
+    Task<int> CreateConverstation(Converstation converstation);
 
-    Task<List<Messages>> GetMessageConverstation(int user1Id, int user2Id);
+    Task<List<Messages>> GetMessageConverstation(int conid);
 
     Task<List<int>> GetIdOFOtherUserInConversation(int userId);
 

@@ -13,4 +13,5 @@ public interface IUserServices
 
 
     Task<List<OtherUserDto>> FindUsers(string UserName);
+    Task<OtherUserDto> GetOtheUserDetails(int id);
 }

@@ -48,6 +48,8 @@ public class ChatDbContext : DbContext
                 .WithMany()  // No navigation property in User for messages
                 .HasForeignKey(m => m.ResiverId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascading deletes
+
+            message.HasOne(m=> m.Converstation).WithMany(m=> m.messages).HasForeignKey(m=> m.ConverstationId).OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Converstation>(coverstation =>

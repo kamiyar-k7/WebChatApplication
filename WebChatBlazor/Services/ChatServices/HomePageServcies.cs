@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.SignalR.Client;
+using System.Security.Claims;
 using WebChatBlazor.Services.AuthServices;
 using WebChatBlazor.Services.Base;
 
@@ -10,13 +12,13 @@ public class HomePageServcies : IHomePageServcies
     #region Ctor
 
     private readonly IClient _client;
-    private readonly IUserProvider _userProvider;
+   
 
 
-    public HomePageServcies(IClient client, IUserProvider userProvider)
+    public HomePageServcies(IClient client)
     {
         _client = client;
-        _userProvider = userProvider;
+      
     }
 
 
@@ -32,15 +34,18 @@ public class HomePageServcies : IHomePageServcies
 
     HubConnection _connection;
 
-    public async Task<List<OtherUserDto>> GetConversations()
+   
+
+    public async Task<List<OtherUserDto>> GetConversations(int cid)
     {
 
-        var user = _userProvider.SetCurrentUserFromClaims();
+       
 
-        var cons = await _client.GetUserConverstationAsync(user.Id);
+         var cons = await _client.GetUserConverstationAsync(cid);
 
         return cons.ToList();
 
+     
     }
 
 

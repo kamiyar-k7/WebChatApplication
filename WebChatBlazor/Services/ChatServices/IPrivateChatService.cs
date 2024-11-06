@@ -4,7 +4,9 @@ namespace WebChatBlazor.Services.ChatServices;
 
 public interface IPrivateChatService
 {
-    Task<List<MessageDto>> GetListOfMessages(int cuurentUser, int otherUser);
-    Task<bool> IsConversationExist(int cuurentUser, int otherUser);
-    Task CreateConverstation(int otherUser);
+    Task<List<MessageDto>> GetListOfMessages(int conid , string id);
+    Task<int> IsConversationExist(int cuurentUser, int otherUser);
+    Task<int> CreateConverstation(int cid, int otherUser);
+    Task<OtherUserDto> GetOtherUserDto(int id);
+
 }

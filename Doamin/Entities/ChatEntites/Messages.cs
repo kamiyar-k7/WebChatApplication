@@ -12,6 +12,7 @@ public class Messages
 
 
     public int SenderId { get; set; }
+   
     public User Sender { get; set; }
 
     public int ResiverId { get; set; }
@@ -21,9 +22,11 @@ public class Messages
 
     public DateTime Timestamp { get; set; }
 
+    public int? ConverstationId { get; set; } 
+
 
     //rels
-    public Converstation Converstation { get; set; }
+    public Converstation? Converstation { get; set; }
 
 }
 

@@ -13,4 +13,6 @@ public interface IUserRepository
     #endregion
 
     Task<List<User>> FindUsers(string UserName);
+
+    Task<User?> GetOtherUserDetails(int id);
 }

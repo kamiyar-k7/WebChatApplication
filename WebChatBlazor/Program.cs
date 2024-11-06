@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor.Services;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using WebChatBlazor.Components;
 using WebChatBlazor.Components.CustomComponents;
@@ -32,8 +33,7 @@ builder.Services.AddSingleton<JwtSecurityTokenHandler>();
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, BlazorAuthorizationMiddlewareResultHandler>();
 builder.Services.AddScoped<AuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(p => p.GetRequiredService<AuthStateProvider>());
-//
-builder.Services.AddScoped<IUserProvider, UserProvider>();
+
 
 //Servcies
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -48,6 +48,13 @@ builder.Services.AddServerSideBlazor()
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+
+var settings = new JsonSerializerSettings
+{
+    DateParseHandling = DateParseHandling.DateTimeOffset,
+    DateFormatHandling = DateFormatHandling.IsoDateFormat
+};
 
 var app = builder.Build();
 

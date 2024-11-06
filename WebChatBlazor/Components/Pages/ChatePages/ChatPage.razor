@@ -1,8 +1,9 @@
 ﻿@page "/chatpage/{id:int}"
 @layout ChatLayout
 @inject NavigationManager _navmanager;
-@inject IUserProvider _userprovider;
 @inject IPrivateChatService _chatservice
+@inject AuthStateProvider _state
+@attribute [Authorize]
 
 <!--top app bar-->
 <MudAppBar Style="height:70px;" Class="d-flex justify-content-center">
@@ -27,13 +28,22 @@
         </MudItem>
 
         <MudItem>
-            <MudText Class="h6 fw-bold">user Name</MudText>
-            <MudText Class="fw-light">Online</MudText>
+            @if(otherUserDto.Id == CurrntUserId)
+            {
+                <MudText Class="h6 fw-bold">Saved Messages</MudText>
+            }
+            else
+            {
+                <MudText Class="h6 fw-bold">@otherUserDto.UserName</MudText>
+                <MudText Class="fw-light">Online</MudText>
+            }
+            
+       
         </MudItem>
 
         <MudSpacer />
         <MudItem Class="d-flex justify-content-end">
-            <MudIconButton Icon="@Icons.Material.Filled.Savings" Size="Size.Large" Edge="Edge.End" Style="color:white;" />
+            <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Size="Size.Large" Edge="Edge.End" Style="color:white;" />
         </MudItem>
 
     </MudGrid>
@@ -49,23 +59,24 @@
         @foreach (var message in ListOfMessages)
         {
 
-            @if (message.SenderId == currentUser.UserId)
+            @if (message.SenderId == CurrntUserId)
             {
                 <MudGrid Class="row d-flex m-1 flex-row-reverse p-1" Style=" padding-right:40px !important;">
-                    <MudItem xs="9" Style="height:auto;" Class="d-flex flex-column text-end bg-primary rounded-5 m-1">
+                    <MudItem xs="9" Style="height:auto;  border-top-right-radius:0px !important; " Class="d-flex flex-column text-end bg-primary rounded-5 m-1">
                         <MudText Class="fw-bold text-white px-1 ">YOU</MudText>
                         <MudDivider />
                         <MudText Class="text-white p-2">
                             <pre Style="white-space: pre-wrap; word-break: break-word; direction: @GetDirection(message.Content)">@message.Content</pre>
                         </MudText>
-
+                        <MudDivider />
+                        <time Class="px-1 text-white">@message.Timestamp</time>
                     </MudItem>
                 </MudGrid>
             }
 
             else
             {
-                <MudGrid Class="row d-flex m-1">
+                <MudGrid Class="row d-flex m-1 py-0 px-1">
                     <MudItem xs="3" sm="1">
                         <MudImage Src="/Images/webicon.jpg"
                                   Alt="User Profile"
@@ -76,20 +87,23 @@
                     </MudItem>
 
 
-                    <MudItem xs="8" sm="8" Style="height:auto;" Class="bg-secondary rounded-5 p-2 ">
+                    <MudItem xs="8" sm="8" Style="height:auto; border-top-left-radius:0px !important; " Class="bg-secondary rounded-5 p-2 ">
 
 
 
-                        <MudText Class="fw-bold text-white">@message.ResiverName</MudText>
+                        <MudText Class="fw-bold text-white px-1">@message.ResiverName</MudText>
                         <MudDivider />
                         <MudText Class="text-white p-2">
                             <pre Style="white-space: pre-wrap; word-break: break-word; direction: @GetDirection(message.Content)">@message.Content</pre>
                         </MudText>
+                        <MudDivider />
+                        <time Class="px-1 text-white">@message.Timestamp</time>
 
                     </MudItem>
                 </MudGrid>
             }
 
+          
         }
     }
     else
@@ -105,7 +119,7 @@
         </MudGrid>
     }
 
-
+    <a id="bottom"></a>
 </MudMainContent>
 
 <!--Bottom app bar-->
@@ -164,59 +178,61 @@
 
 
 @code {
-    private bool exist = false;
-
-    UserContext currentUser { get; set; }
 
     private List<MessageDto> ListOfMessages = new();
 
+    private OtherUserDto? otherUserDto { get; set; } = new OtherUserDto();
+
+    private int conId = 0;
 
     [Parameter]
     public int id { get; set; }
 
+    private int CurrntUserId;
 
     HubConnection? HubConnection;
 
     protected override async Task OnInitializedAsync()
     {
-
         //get current user
-        currentUser = await _userprovider.SetCurrentUserFromClaims();
-
-        //check for convesation existness
-        exist = await _chatservice.IsConversationExist(currentUser.UserId, id);
+        var claims = await _state.GetClaims();
+        CurrntUserId = int.Parse( claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value);
 
 
-        ListOfMessages = exist ? await _chatservice.GetListOfMessages(currentUser.UserId, id) : new();
+        //get other user
+       otherUserDto = await _chatservice.GetOtherUserDto(id);
 
+
+        //get conversation id
+        conId = await _chatservice.IsConversationExist(CurrntUserId, id);
+
+
+        ListOfMessages = conId != 0 ? await _chatservice.GetListOfMessages(conId, id.ToString()) : new();
+
+
+        #region    Hub 
         HubConnection = new HubConnectionBuilder()
-            .WithUrl("https://localhost:7019/ChatHub")
-            .WithAutomaticReconnect()
-            .Build();
+          .WithUrl("https://localhost:7019/ChatHub")
+          .WithAutomaticReconnect()
+          .Build();
 
-        // Listen for incoming messages
+  
         HubConnection.On<MessageDto>("ReceiveMessage", async message =>
         {
-            await InvokeAsync(() =>
+            await InvokeAsync(async () =>
             {
 
-                ListOfMessages.Add(message);
+                ListOfMessages = await _chatservice.GetListOfMessages(conId, id.ToString());
                 StateHasChanged();
 
             });
         });
 
         await HubConnection.StartAsync();
-
-
-        await base.OnInitializedAsync();
-
-
-
-
+        #endregion
+      
 
     }
-
 
     //send meesage
 
@@ -226,19 +242,21 @@
     {
         try
         {
-            model.SenderId = currentUser.UserId;
+            model.SenderId = CurrntUserId;
             model.ResiverId = id;
-            if (!exist)
+            if (conId == 0)
             {
-                await HubConnection?.SendAsync("AddConversation", currentUser.UserId, id);
-                exist = true;
+                conId = await _chatservice.CreateConverstation( CurrntUserId, id);
+
+
             }
+            model.ConverstationId = conId;
 
 
             await HubConnection.SendAsync("SendMessage", model);
             model.Content = string.Empty;
 
-
+            StateHasChanged();
         }
 
         catch (ApiException ex)
@@ -250,20 +268,17 @@
 
 
 
+
     private string GetDirection(string content)
     {
-        // Basic check: if the content has Persian characters, set RTL direction
+        
         return content.Any(c => char.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.OtherLetter) ? "rtl" : "ltr";
     }
+   
+
 
     private void BackToHome()
     {
         _navmanager.NavigateTo("/");
     }
-
-
 }
-
-
-
-

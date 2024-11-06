@@ -20,7 +20,7 @@ public class Converstation
     public User? User2 { get; set; }
 
     // messages between 2 users
-    public List<Messages> messages { get; set; }
+    public List<Messages>? messages { get; set; }
 
 
 

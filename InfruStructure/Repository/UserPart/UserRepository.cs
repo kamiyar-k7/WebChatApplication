@@ -63,7 +63,18 @@ public class UserRepository : IUserRepository
      .AsQueryable().AsNoTracking().ToListAsync();
     }
 
+    public async Task<User?> GetOtherUserDetails(int id)
+    {
 
+        return await _DbContext.Users.Where(x => x.Id == id).Select(x => new User
+        {
+            Id = x.Id,
+            CreatedAt = DateTime.Now,
+            //  UserEmail= x.UserEmail,
+            UserName = x.UserName,
+
+        }).FirstOrDefaultAsync();
+    }
 
 }
 

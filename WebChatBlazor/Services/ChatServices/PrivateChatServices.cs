@@ -11,39 +11,40 @@ public class PrivateChatServices : IPrivateChatService
     #region Ctor
 
     private readonly IClient _client;
-    private readonly IUserProvider _userProvider;
-    public PrivateChatServices(IClient client, IUserProvider userProvider)
+  
+    public PrivateChatServices(IClient client)
     {
         _client = client;
-        _userProvider = userProvider;
+        
     }
     #endregion
 
-    public int CurrentUserId()
+   
+
+    public async Task<OtherUserDto> GetOtherUserDto(int id)
     {
-     var userr =   _userProvider.SetCurrentUserFromClaims();
-        return userr.Id;
+        return await _client.GetOtherUserDetailsAsync(id);
     }
 
 
-    public async Task<List<MessageDto>> GetListOfMessages(int cuurentUser, int otherUser)
-    {
-        var messages = await _client.GetListOfMessagesAsync(cuurentUser, otherUser);
+    public async Task<List<MessageDto>> GetListOfMessages(int conid , string id)
+    {   
+        var messages = await _client.GetListOfMessagesAsync(conid,id );
 
      
         return messages.ToList();
     }
 
-    public async Task<bool> IsConversationExist(int cuurentUser, int otherUser)
+    public async Task<int> IsConversationExist(int cuurentUser, int otherUser)
     {
-        return  await _client.IsConverstationExistAsync(cuurentUser, otherUser);
-
+          return  await _client.IsConverstationExistAsync(cuurentUser, otherUser);
+     
     }
 
-    public async Task CreateConverstation(int otherUser)
+    public async Task<int> CreateConverstation(int cid ,int otherUser)
     {
-        var cid = CurrentUserId();
-        await _client.CreateConverstationAsync(cid, otherUser);
+       
+        return   await _client.CreateConverstationAsync(cid, otherUser);
     }
 
    

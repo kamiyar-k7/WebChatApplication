@@ -1,35 +1,41 @@
-﻿
+﻿@inject AuthStateProvider _state
+
 
 <!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/" />
-    <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
-    <link rel="stylesheet" href="app.css" />
-    <link rel="stylesheet" href="WebChatBlazor.styles.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
-    <link rel="stylesheet" href="bootstrap-5.3.3-dist/css/bootstrap.css" />
-    <link rel="stylesheet" href="MyStyles/Css/MainLayoutCss.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
-    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    <html lang="en">
 
-    <HeadOutlet @rendermode="new InteractiveServerRenderMode(prerender : false)" />
-</head>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <base href="/" />
+        <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
+        <link rel="stylesheet" href="app.css" />
+        <link rel="stylesheet" href="WebChatBlazor.styles.css" />
+        <link rel="icon" type="image/png" href="favicon.png" />
+        <link rel="stylesheet" href="bootstrap-5.3.3-dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="MyStyles/Css/MainLayoutCss.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+        <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
 
-<body>
-    <Routes @rendermode="new InteractiveServerRenderMode(prerender : false)" />
-    <script src="_framework/blazor.web.js"></script>
-    <script src="bootstrap-5.3.3-dist/js/bootstrap.min.js"></script>
-    <script src="MyStyles/js/Modal.js"></script>
-    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+        <HeadOutlet @rendermode="new InteractiveServerRenderMode(prerender : false)" />
+    </head>
+    
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+ 
+    <body>
+        <Routes @rendermode="new InteractiveServerRenderMode(prerender : false)" />
+        <script src="_framework/blazor.web.js"></script>
+        <script src="bootstrap-5.3.3-dist/js/bootstrap.min.js"></script>
+        <script src="MyStyles/js/Modal.js"></script>
+        <script src="_content/MudBlazor/MudBlazor.min.js"></script>
 
-</body>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    </body>
 
 </html>
+@code{
 
+}

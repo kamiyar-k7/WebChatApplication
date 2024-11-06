@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Components;
 
 
 public partial class AuthStateProvider : AuthenticationStateProvider
@@ -30,6 +31,7 @@ public partial class AuthStateProvider : AuthenticationStateProvider
         {
             return new AuthenticationState(notloggedin);
         }
+
 
         var tokencontent = _TokenHandler.ReadJwtToken(savedtoken);
         if (tokencontent.ValidTo < DateTime.UtcNow)
@@ -70,7 +72,7 @@ public partial class AuthStateProvider : AuthenticationStateProvider
         return claims;
     }
 
-
+    
 
     // fixed attribute
     public class BlazorAuthorizationMiddlewareResultHandler : IAuthorizationMiddlewareResultHandler

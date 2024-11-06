@@ -36,8 +36,8 @@ public class ChatServices : IChatServices
             Content = message.Content,
             ResiverId = message.ResiverId,
             SenderId = message.SenderId,
-            Timestamp = DateTime.UtcNow,
-            
+            Timestamp = DateTime.Now,
+            ConverstationId = message.ConverstationId,
 
         };
 
@@ -51,13 +51,13 @@ public class ChatServices : IChatServices
 
     #region Converstation Room
 
-    public async Task<bool> IsCoverstationExist(int user1Id, int user2Id)
+    public async Task<int> GetConversationId(int user1Id, int user2Id)
     {
 
-        return await _converstationRepo.IsConverstationExist(user1Id, user2Id);
+       return await _converstationRepo.GetCoversationId(user1Id, user2Id);
     }
 
-    public async Task CreateConverstation(int user1Id, int user2Id)
+    public async Task<int> CreateConverstation(int user1Id, int user2Id)
     {
 
         Converstation converstation = new Converstation()
@@ -66,14 +66,14 @@ public class ChatServices : IChatServices
             User2Id = user2Id,
         };
 
-        await _converstationRepo.CreateConverstation(converstation);
-
+       var id = await _converstationRepo.CreateConverstation(converstation);
+        return id;
     }
 
-    public async Task<List<MessageDto>> GetConverstationMessages(int currentUser, int OtherUser)
+    public async Task<List<MessageDto>> GetConverstationMessages(int conid)
     {
 
-        var meesages = await _converstationRepo.GetMessageConverstation(currentUser, OtherUser);
+        var meesages = await _converstationRepo.GetMessageConverstation(conid);
 
         List<MessageDto> messagelist = new List<MessageDto>();
 
