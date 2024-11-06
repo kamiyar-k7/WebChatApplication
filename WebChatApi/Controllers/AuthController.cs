@@ -8,11 +8,11 @@ namespace WebChatApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UserController : ControllerBase
+public class AuthController : ControllerBase
 {
     #region Ctor
     private readonly IUserServices _userServices;
-    public UserController(IUserServices userServices)
+    public AuthController(IUserServices userServices)
     {
         _userServices = userServices;
     }
@@ -40,8 +40,6 @@ public class UserController : ControllerBase
     }
 
     [ProducesResponseType(StatusCodes.Status200OK)]
-    //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    //[ProducesResponseType(StatusCodes.Status400BadRequest)]
     [HttpPost("[Action]")]
     public async Task<ActionResult<string>> SignIn(UserSignInDto userSignInDto)
     {

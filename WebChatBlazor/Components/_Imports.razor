@@ -1,20 +1,28 @@
 ﻿@using System.Net.Http
 @using System.Net.Http.Json
+@using Microsoft.AspNetCore.Http
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Authorization
+@using WebChatBlazor.Components.Pages.ChatePages
 @using WebChatBlazor.Components.CustomComponents
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.JSInterop
 @using WebChatBlazor
 @using WebChatBlazor.Components
 @using WebChatBlazor.Components.Layout
 @using WebChatBlazor.Services.Base
-@using WebChatBlazor.Services.UserServices
+@using WebChatBlazor.Services.AuthServices
+@using WebChatBlazor.Services.ChatServices
 @using WebChatBlazor.Services.ExHandler
+@using System.Security.Claims
 @using System.Text.Json
 @using System.Text
 @using System.Timers
+@using MudBlazor
+@using Microsoft.AspNetCore.SignalR.Client
 
 @* @layout MainLayout *@

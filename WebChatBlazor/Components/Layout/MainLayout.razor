@@ -1,25 +1,161 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager _navmanager
+@inject IHomePageServcies _homeservices
+@inject AuthStateProvider _state
 
-<div class="page">
-   @*  <div class="sidebar">
-        <NavMenu />
-    </div> *@
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
-    <main>
-      
 
-        <article class="content px-4">
+
+
+<MudLayout>
+
+
+    <MudAppBar>
+        <MudGrid Class="d-flex align-items-center">
+            <MudItem>
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@(() => DrawerButton())" />
+                Web Chat 
+            
+            </MudItem>
+
+            <MudSpacer /> 
+
+            <MudItem Class="d-flex align-items-center justify-content-end">
+
+                <MudTextField Value="UserName"
+                              ValueChanged="@((string userName) => SerchUsers(userName))"
+                              Immediate="true"
+                              Placeholder="Search For UserNames"
+                              Variant="Variant.Outlined"
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Class="white-text" />
+            </MudItem>
+           
+
+
+        </MudGrid>
+
+    </MudAppBar>
+
+
+    <MudDrawer @bind-Open="@opendrawer" Class="white-text" Style="background-color:rgba(89, 74, 226, 1);">
+
+
+
+        <MudNavMenu Class="mt-1">
+
+            <MudNavLink Href="/" Match="NavLinkMatch.All">Home</MudNavLink>
+            <MudNavLink Href="/" Match="NavLinkMatch.Prefix">My Profile</MudNavLink>
+
+            <MudNavGroup Title="check">
+
+                <MudNavLink Href="/" Match="NavLinkMatch.Prefix">Settings</MudNavLink>
+                <MudNavLink Href="/" Match="NavLinkMatch.Prefix" Class="text-danger">LogOut</MudNavLink>
+
+            </MudNavGroup>
+
+            <MudNavLink Match="NavLinkMatch.Prefix">Theme</MudNavLink>
+
+            <MudNavLink Href="/" Match="NavLinkMatch.Prefix">About</MudNavLink>
+
+        </MudNavMenu>
+    </MudDrawer>
+
+    @if (!string.IsNullOrEmpty(UserName))
+    {
+        <SearchUsers Model="@model" message="@message" />
+    }
+    else
+    {
+        <MudMainContent Class="bg-dark">
             @Body
-        </article>
+        </MudMainContent>
+    }
+
+
+</MudLayout>
+
+@code {
 
 
 
-    </main>
+    HubConnection _connection;
 
-</div>
+    protected override async Task OnInitializedAsync()
+    {
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
+        _connection = new HubConnectionBuilder().WithUrl("https://localhost:7019/ChatHub").WithAutomaticReconnect().Build();
+
+        _connection.On<List<OtherUserDto>>("GetSearch", async users =>
+        {
+
+            await InvokeAsync(() =>
+            {
+                if (users.Count > 0)
+                {
+                    model = users;
+                    message = string.Empty;
+                  
+                }
+                else
+                {
+                    message = "There is no user with this username";
+
+                  
+                }
+                StateHasChanged();
+            });
+        });
+
+        await _connection.StartAsync();
+
+    }
+
+    public string UserName { get; set; } = string.Empty;
+    private string message { get; set; } = string.Empty;
+   
+    private async Task SerchUsers(string userName)
+    {
+        UserName = userName;   
+        await _connection.SendAsync("SearchUsers", UserName);   
+
+    }
+
+
+    bool opendrawer = false;
+    private int id;
+    private List<OtherUserDto> model = new List<OtherUserDto>();
+
+    void DrawerButton()
+    {
+        opendrawer = !opendrawer;
+    }
+
+
+
+
+
+   
+
+    void OpenChat(int id)
+    {
+
+        _navmanager.NavigateTo($"chatpage/{id}");
+    }
+
+
+
+
+
+}
+
+
+
+
+
+

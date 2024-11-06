@@ -1,9 +1,10 @@
 ﻿using WebChatBlazor.Services.Base;
 
-namespace WebChatBlazor.Services.UserServices;
+namespace WebChatBlazor.Services.AuthServices;
 
-public interface IUserServices
+public interface IAuthenticationService
 {
     Task SignUp(UserSignUpDto userdto);
     Task SignIn(UserSignInDto userdto);
+    Task GetToken();
 }

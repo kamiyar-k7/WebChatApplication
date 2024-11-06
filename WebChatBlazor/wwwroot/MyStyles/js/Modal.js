@@ -10,3 +10,4 @@ function CloseBootStrapModal(modalId) {
         modal.hide();
     }
 }
+

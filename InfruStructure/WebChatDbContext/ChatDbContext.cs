@@ -1,6 +1,6 @@
 ﻿
 
-using Doamin.Entities.Chats;
+using Doamin.Entities.ChatEntites;
 using Doamin.Entities.UserEntities;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,28 +22,52 @@ public class ChatDbContext : DbContext
     public DbSet<Role> Roles { get; set; }
     public DbSet<UserSelectedRole> UserSelectedRoles { get; set; }
 
-    // chats
-    public DbSet<Message> Messages { get; set; }
-    public DbSet<ChatRoom> ChatRooms { get; set; }
-    public DbSet<UserChatRoom> UserChatRooms { get; set; }
+
+    //  chats
+    public DbSet<Messages> Messages { get; set; }
+    public DbSet<Converstation> converstations { get; set; }
+
+
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
 
-
-        modelBuilder.Entity<User>(user =>
+        modelBuilder.Entity<Messages>(message =>
         {
-            user.Property(name => name.UserName).HasMaxLength(20);
-            user.Property(email => email.UserEmail).HasMaxLength(30);
+            message.Property(m => m.Content).HasMaxLength(1000);
 
+            // Configure Sender relationship
+            message.HasOne(m => m.Sender)
+                .WithMany()  // No navigation property in User for messages
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading deletes
+
+            // Configure Receiver relationship
+            message.HasOne(m => m.Resiver)
+                .WithMany()  // No navigation property in User for messages
+                .HasForeignKey(m => m.ResiverId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading deletes
+
+            message.HasOne(m=> m.Converstation).WithMany(m=> m.messages).HasForeignKey(m=> m.ConverstationId).OnDelete(DeleteBehavior.SetNull);
         });
 
-        modelBuilder.Entity<Message>(message =>
+        modelBuilder.Entity<Converstation>(coverstation =>
         {
-            message.Property(message => message.Content).HasMaxLength(1000);
-        });
 
+
+            // Configure Sender relationship
+            coverstation.HasOne(m => m.User1)
+                .WithMany()  // No navigation property in User for messages
+                .HasForeignKey(m => m.User1Id)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading deletes
+
+            // Configure Sender relationship
+            coverstation.HasOne(m => m.User2)
+                .WithMany()  // No navigation property in User for messages
+                .HasForeignKey(m => m.User2Id)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading deletes
+        });
 
         base.OnModelCreating(modelBuilder);
     }

@@ -1,0 +1,113 @@
+﻿@page "/"
+@using System.Security.Claims
+@layout MainLayout
+@attribute [Authorize]
+@inject NavigationManager _navmanager;
+@inject IHomePageServcies _homepageservcies;
+@inject AuthStateProvider _state
+
+
+<MudItem Class="row overflow-hidden">
+
+    <!--1-->
+    @if (model.Any() && model != null)
+    {
+        @foreach (var user in model)
+        {
+            if(user.Id == CurrntUserId)
+            {
+                user.UserName = "Saved Messages";
+            }
+
+            <MudButton OnClick="@(() => OpenChat(user.Id))" sm="12" Class="container-fluid overflow-hidden white-text p-1  d-flex align-items-center justify-content-start">
+
+                <MudImage Src="/Images/webicon.jpg"
+                          Alt="User Profile"
+                          ObjectFit="ObjectFit.Cover"
+                          Fluid="true"
+                          Width="100"
+                          Height="100"
+                          ObjectPosition="ObjectPosition.Center"
+                          Class="rounded-circle  ms-1 my-2" />
+
+
+                <MudItem Class="d-flex flex-column ms-3">
+
+                    <MudText Class="fw-bold h4 d-flex justify-content-start">@user.UserName</MudText>
+                    <MudText Class="text-truncate mt-1 d-flex justify-content-start">lorem lorem lorem lorem lorem 1</MudText>
+
+
+                </MudItem>
+
+            </MudButton>
+
+
+            <MudDivider class="text-secondary mx-3 my-1" />
+        }
+    }
+    else
+    {
+        <p>
+            Start A chat
+        </p>
+    }
+
+
+
+
+</MudItem>
+
+
+
+
+
+@code {
+
+    List<OtherUserDto?> model { get; set; } = new List<OtherUserDto?>();
+    private int CurrntUserId;
+    HubConnection? _connection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var claims = await _state.GetClaims();
+        CurrntUserId = int.Parse(claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value);
+
+
+
+        model = await _homepageservcies.GetConversations(CurrntUserId);
+
+
+
+        #region SignalR
+        _connection = new HubConnectionBuilder().
+        WithUrl("https://localhost:7019/ChatHub").
+        WithAutomaticReconnect().Build();
+
+        _connection.On("GetConversations", async () =>
+        {
+            await InvokeAsync(async () =>
+                {
+                    model = await _homepageservcies.GetConversations(CurrntUserId);
+                    StateHasChanged();
+                });
+        });
+
+
+        await _connection.StartAsync();
+
+        #endregion
+    }
+
+
+
+    void OpenChat(int otheruserid)
+    {
+
+        _navmanager.NavigateTo($"chatpage/{otheruserid}");
+    }
+
+
+
+}
+
+

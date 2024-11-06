@@ -1,0 +1,284 @@
+﻿@page "/chatpage/{id:int}"
+@layout ChatLayout
+@inject NavigationManager _navmanager;
+@inject IPrivateChatService _chatservice
+@inject AuthStateProvider _state
+@attribute [Authorize]
+
+<!--top app bar-->
+<MudAppBar Style="height:70px;" Class="d-flex justify-content-center">
+
+    <MudGrid Class="d-flex align-items-center">
+
+        <MudItem>
+            <MudIconButton Icon="@Icons.Material.Filled.KeyboardArrowLeft" Edge="Edge.Start" OnClick="BackToHome" Style="color:white;" />
+
+        </MudItem>
+
+        <MudItem Class="">
+            <MudImage Src="/Images/webicon.jpg"
+                      Alt="User Profile"
+                      ObjectFit="ObjectFit.Cover"
+                      Fluid="true"
+                      Width="50"
+                      Height="50"
+                      ObjectPosition="ObjectPosition.Center"
+                      Class="rounded-circle" />
+
+        </MudItem>
+
+        <MudItem>
+            @if(otherUserDto.Id == CurrntUserId)
+            {
+                <MudText Class="h6 fw-bold">Saved Messages</MudText>
+            }
+            else
+            {
+                <MudText Class="h6 fw-bold">@otherUserDto.UserName</MudText>
+                <MudText Class="fw-light">Online</MudText>
+            }
+            
+       
+        </MudItem>
+
+        <MudSpacer />
+        <MudItem Class="d-flex justify-content-end">
+            <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Size="Size.Large" Edge="Edge.End" Style="color:white;" />
+        </MudItem>
+
+    </MudGrid>
+
+</MudAppBar>
+
+<!-- chats -->
+<MudMainContent Class="h-100 overflow-hidden" Style="padding-bottom:110px;  padding-top:20px;">
+
+
+    @if (ListOfMessages.Any())
+    {
+        @foreach (var message in ListOfMessages)
+        {
+
+            @if (message.SenderId == CurrntUserId)
+            {
+                <MudGrid Class="row d-flex m-1 flex-row-reverse p-1" Style=" padding-right:40px !important;">
+                    <MudItem xs="9" Style="height:auto;  border-top-right-radius:0px !important; " Class="d-flex flex-column text-end bg-primary rounded-5 m-1">
+                        <MudText Class="fw-bold text-white px-1 ">YOU</MudText>
+                        <MudDivider />
+                        <MudText Class="text-white p-2">
+                            <pre Style="white-space: pre-wrap; word-break: break-word; direction: @GetDirection(message.Content)">@message.Content</pre>
+                        </MudText>
+                        <MudDivider />
+                        <time Class="px-1 text-white">@message.Timestamp</time>
+                    </MudItem>
+                </MudGrid>
+            }
+
+            else
+            {
+                <MudGrid Class="row d-flex m-1 py-0 px-1">
+                    <MudItem xs="3" sm="1">
+                        <MudImage Src="/Images/webicon.jpg"
+                                  Alt="User Profile"
+                                  ObjectFit="ObjectFit.Cover"
+                                  Fluid="true"
+                                  ObjectPosition="ObjectPosition.Center"
+                                  Class="rounded-circle bg-transparent" />
+                    </MudItem>
+
+
+                    <MudItem xs="8" sm="8" Style="height:auto; border-top-left-radius:0px !important; " Class="bg-secondary rounded-5 p-2 ">
+
+
+
+                        <MudText Class="fw-bold text-white px-1">@message.ResiverName</MudText>
+                        <MudDivider />
+                        <MudText Class="text-white p-2">
+                            <pre Style="white-space: pre-wrap; word-break: break-word; direction: @GetDirection(message.Content)">@message.Content</pre>
+                        </MudText>
+                        <MudDivider />
+                        <time Class="px-1 text-white">@message.Timestamp</time>
+
+                    </MudItem>
+                </MudGrid>
+            }
+
+          
+        }
+    }
+    else
+    {
+        <MudGrid Class="d-flex align-items-center justify-content-center vh-100 overflow-hidden m-0">
+            <MudItem xs="12" Class="d-flex align-items-center justify-content-center text-center">
+                <MudText Class="text-white bg-dark">
+                    You Have No Messages Here
+                    <br />
+                    Send A Message To Start Chat!
+                </MudText>
+            </MudItem>
+        </MudGrid>
+    }
+
+    <a id="bottom"></a>
+</MudMainContent>
+
+<!--Bottom app bar-->
+<MudAppBar Bottom="true" Fixed="true" Elevation="1" Style="height:100px;" Class="d-flex justify-content-center bg-dark">
+
+
+    <EditForm Model="model" OnValidSubmit="SendMessage" Class=" d-flex align-items-center col-12" Style="height:auto;">
+
+        <MudGrid Class=" d-flex align-items-center" Style="height:auto;">
+
+            <MudItem xs="10" Class="d-flex">
+
+                <MudTextField @bind-Value="@model.Content"
+                              Placeholder="Type your message..."
+                              Variant="Variant.Outlined"
+                              Adornment="Adornment.None"
+                              Class="w-100 white-text"
+                              AutoGrow
+                              MaxLines="3"
+                              Style="height: auto;" />
+
+            </MudItem>
+
+            <MudItem xs="2" Class="d-flex justify-content-center">
+                <MudButton ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           EndIcon="@Icons.Material.Filled.Send"
+                           IconColor="Color.Info"
+                           Class=" white-text w-100">
+
+                </MudButton>
+                <MudButton>
+
+                </MudButton>
+            </MudItem>
+
+        </MudGrid>
+
+    </EditForm>
+
+</MudAppBar>
+
+<style>
+    .rtl-text {
+        direction: rtl;
+        text-align: right;
+    }
+
+    .ltr-text {
+        direction: ltr;
+        text-align: left;
+    }
+
+</style>
+
+
+@code {
+
+    private List<MessageDto> ListOfMessages = new();
+
+    private OtherUserDto? otherUserDto { get; set; } = new OtherUserDto();
+
+    private int conId = 0;
+
+    [Parameter]
+    public int id { get; set; }
+
+    private int CurrntUserId;
+
+    HubConnection? HubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //get current user
+        var claims = await _state.GetClaims();
+        CurrntUserId = int.Parse( claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value);
+
+
+        //get other user
+       otherUserDto = await _chatservice.GetOtherUserDto(id);
+
+
+        //get conversation id
+        conId = await _chatservice.IsConversationExist(CurrntUserId, id);
+
+
+        ListOfMessages = conId != 0 ? await _chatservice.GetListOfMessages(conId, id.ToString()) : new();
+
+
+        #region    Hub 
+        HubConnection = new HubConnectionBuilder()
+          .WithUrl("https://localhost:7019/ChatHub")
+          .WithAutomaticReconnect()
+          .Build();
+
+  
+        HubConnection.On<MessageDto>("ReceiveMessage", async message =>
+        {
+            await InvokeAsync(async () =>
+            {
+
+                ListOfMessages = await _chatservice.GetListOfMessages(conId, id.ToString());
+                StateHasChanged();
+
+            });
+        });
+
+        await HubConnection.StartAsync();
+        #endregion
+      
+
+    }
+
+    //send meesage
+
+    private MessageDto model = new MessageDto();
+
+    private async Task SendMessage()
+    {
+        try
+        {
+            model.SenderId = CurrntUserId;
+            model.ResiverId = id;
+            if (conId == 0)
+            {
+                conId = await _chatservice.CreateConverstation( CurrntUserId, id);
+
+
+            }
+            model.ConverstationId = conId;
+
+
+            await HubConnection.SendAsync("SendMessage", model);
+            model.Content = string.Empty;
+
+            StateHasChanged();
+        }
+
+        catch (ApiException ex)
+        {
+
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+
+
+
+    private string GetDirection(string content)
+    {
+        
+        return content.Any(c => char.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.OtherLetter) ? "rtl" : "ltr";
+    }
+   
+
+
+    private void BackToHome()
+    {
+        _navmanager.NavigateTo("/");
+    }
+}

@@ -1,7 +1,4 @@
-﻿
-
-using Application.ViewModel_And_Dto.Dto.UserSide;
-using Doamin.Entities.UserEntities;
+﻿using Doamin.Entities.UserEntities;
 using Doamin.IRepository.UserPart;
 using InfruStructure.WebChatDbContext;
 using Microsoft.EntityFrameworkCore;
@@ -23,19 +20,21 @@ public class UserRepository : IUserRepository
         await _DbContext.SaveChangesAsync();
     }
 
+    #region Auth Services
+
     public async Task AddUser(User user)
     {
         await _DbContext.Users.AddAsync(user);
         await SaveChanges();
     }
 
-    public async Task<User?> SignIn(string email  , string password)
+    public async Task<User?> SignIn(string email, string password)
     {
         return await _DbContext.Users.Where(user => user.UserEmail == email && user.Password == password).Select(x => new User
         {
             Id = x.Id,
             UserEmail = x.UserEmail,
-            UserName = x.UserName, 
+            UserName = x.UserName,
             CreatedAt = DateTime.Now,
         }).FirstOrDefaultAsync();
 
@@ -43,8 +42,41 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> IsExist(string email)
     {
-        return  await _DbContext.Users.AnyAsync(x=> x.UserEmail == email );
+        return await _DbContext.Users.AnyAsync(x => x.UserEmail == email);
     }
-    
+    #endregion
+
+
+    // Search 
+    public async Task<List<User>> FindUsers(string UserName)
+    {
+
+        return await _DbContext.Users
+     .Where(u => u.UserName.Contains(UserName))
+     .OrderByDescending(u => u.UserName.StartsWith(UserName))
+     .ThenBy(u => u.UserName)
+     .Select(x => new User
+     {
+         UserName = x.UserName,
+         Id = x.Id,
+     })
+     .AsQueryable().AsNoTracking().ToListAsync();
+    }
+
+    public async Task<User?> GetOtherUserDetails(int id)
+    {
+
+        return await _DbContext.Users.Where(x => x.Id == id).Select(x => new User
+        {
+            Id = x.Id,
+            CreatedAt = DateTime.Now,
+            //  UserEmail= x.UserEmail,
+            UserName = x.UserName,
+
+        }).FirstOrDefaultAsync();
+    }
 
 }
+
+
+

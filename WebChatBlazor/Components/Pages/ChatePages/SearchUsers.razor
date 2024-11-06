@@ -1,0 +1,68 @@
+﻿@layout MainLayout
+@inject NavigationManager _navmanager;
+@inject IHomePageServcies _homeservices;
+
+
+<MudMainContent Class="bg-dark">
+    <MudItem Class="row overflow-hidden">
+
+        <!--1-->
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <div class="bg-warning">@message</div>
+        }
+        else
+        {
+            @foreach (var user in model)
+            {
+
+                <MudButton OnClick="@(() => OpenChat(user.Id))" sm="12" Class="container-fluid overflow-hidden white-text p-1  d-flex align-items-center justify-content-start">
+
+                    <MudImage Src="/Images/webicon.jpg"
+                              Alt="User Profile"
+                              ObjectFit="ObjectFit.Cover"
+                              Fluid="true"
+                              Width="100"
+                              Height="100"
+                              ObjectPosition="ObjectPosition.Center"
+                              Class="rounded-circle  ms-1 my-2" />
+
+
+                    <MudItem Class="d-flex flex-column ms-3">
+
+                        <MudText Class="fw-bold h4 d-flex justify-content-start">@user.UserName</MudText>
+                        <MudText Class="text-truncate mt-1 d-flex justify-content-start">lorem lorem lorem lorem lorem 1</MudText>
+
+
+                    </MudItem>
+
+                </MudButton>
+                <MudDivider class="text-secondary mx-3 my-1" />
+            }
+        }
+
+
+
+    </MudItem>
+</MudMainContent>
+
+@code{
+    [Parameter]
+    public List<OtherUserDto> model { get; set; } = new List<OtherUserDto>();
+
+    [Parameter]
+    public string message { get; set; } 
+
+    protected override Task OnInitializedAsync()
+    {
+        StateHasChanged();
+        return base.OnInitializedAsync();
+    }
+
+
+    void OpenChat(int id)
+    {
+
+        _navmanager.NavigateTo($"chatpage/{id}");
+    }
+}

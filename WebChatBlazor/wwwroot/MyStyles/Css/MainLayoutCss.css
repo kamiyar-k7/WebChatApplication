@@ -1,0 +1,19 @@
+﻿
+body {
+   
+    background: url(../../Images/webicon.jpg) no-repeat center center fixed;
+    background-size: cover;
+
+    
+}
+
+.text-truncate {
+    overflow: hidden; /* Hide any overflow text */
+    white-space: nowrap; /* Ensure text stays on a single line */
+    text-overflow: ellipsis; /* Add '...' at the end of overflowing text */
+    max-width: 250px; /* Optional: set a maximum width to control where truncation happens */
+}
+
+.white-text * {
+    color: white !important;
+}

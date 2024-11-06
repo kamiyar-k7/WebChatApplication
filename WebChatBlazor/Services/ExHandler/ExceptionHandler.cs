@@ -47,7 +47,7 @@ public static class ExceptionHandler
         {
             return new ExeptionDto
             {
-                Message = ex.Response,
+                Message = ex.Message,
                 StatusCode = ex.StatusCode,
             };
         }
