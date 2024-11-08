@@ -14,12 +14,12 @@
     {
         @foreach (var user in model)
         {
-            if(user.Id == CurrntUserId)
+            if(user.OtherUserId == CurrntUserId)
             {
                 user.UserName = "Saved Messages";
             }
 
-            <MudButton OnClick="@(() => OpenChat(user.Id))" sm="12" Class="container-fluid overflow-hidden white-text p-1  d-flex align-items-center justify-content-start">
+            <MudButton OnClick="@(() => OpenChat(user.OtherUserId))" sm="12" Class="container-fluid overflow-hidden white-text p-1  d-flex align-items-center justify-content-start">
 
                 <MudImage Src="/Images/webicon.jpg"
                           Alt="User Profile"
@@ -34,8 +34,9 @@
                 <MudItem Class="d-flex flex-column ms-3">
 
                     <MudText Class="fw-bold h4 d-flex justify-content-start">@user.UserName</MudText>
-                    <MudText Class="text-truncate mt-1 d-flex justify-content-start">lorem lorem lorem lorem lorem 1</MudText>
-
+                    <MudText Class="text-truncate mt-1 d-flex justify-content-start">@user.LastMessage</MudText>
+                    <br />
+                    <p Class="px-1 text-white">@string.Format("{0:dd/MM/yyyy HH:mm}", user.LastMessageTimestamp) </p>
 
                 </MudItem>
 
@@ -63,7 +64,7 @@
 
 @code {
 
-    List<OtherUserDto?> model { get; set; } = new List<OtherUserDto?>();
+    List<ConversationDto?> model { get; set; } = new List<ConversationDto?>();
     private int CurrntUserId;
     HubConnection? _connection;
 

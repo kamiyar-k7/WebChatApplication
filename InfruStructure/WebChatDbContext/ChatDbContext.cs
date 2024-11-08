@@ -25,13 +25,21 @@ public class ChatDbContext : DbContext
 
     //  chats
     public DbSet<Messages> Messages { get; set; }
-    public DbSet<Converstation> converstations { get; set; }
+    public DbSet<Conversation> conversations { get; set; }
 
 
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<User>(user =>
+        {
+            user.Property(u => u.UserName).HasMaxLength(30);
+            user.Property(u => u.FirstName).HasMaxLength(30);
+            user.Property(u => u.LastName).HasMaxLength(30);
+            
+    
+        });
 
         modelBuilder.Entity<Messages>(message =>
         {
@@ -49,10 +57,10 @@ public class ChatDbContext : DbContext
                 .HasForeignKey(m => m.ResiverId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascading deletes
 
-            message.HasOne(m=> m.Converstation).WithMany(m=> m.messages).HasForeignKey(m=> m.ConverstationId).OnDelete(DeleteBehavior.SetNull);
+            message.HasOne(m=> m.Conversation).WithMany(m=> m.messages).HasForeignKey(m=> m.ConversationId).OnDelete(DeleteBehavior.SetNull);
         });
 
-        modelBuilder.Entity<Converstation>(coverstation =>
+        modelBuilder.Entity<Conversation>(coverstation =>
         {
 
 

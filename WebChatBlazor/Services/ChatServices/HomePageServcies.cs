@@ -34,16 +34,23 @@ public class HomePageServcies : IHomePageServcies
 
     HubConnection _connection;
 
-   
 
-    public async Task<List<OtherUserDto>> GetConversations(int cid)
+
+    public async Task<List<ConversationDto>> GetConversations(int cid)
     {
 
-       
 
-         var cons = await _client.GetUserConverstationAsync(cid);
 
-        return cons.ToList();
+        var cons = await _client.GetUserConverstationsAsync(cid);
+        if (cons != null)
+        {
+            return cons.ToList();
+        }
+        else
+        {
+            return new List<ConversationDto>();
+        }
+     
 
      
     }

@@ -22,7 +22,7 @@ namespace InfruStructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Doamin.Entities.ChatEntites.Converstation", b =>
+            modelBuilder.Entity("Doamin.Entities.ChatEntites.Conversation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -42,7 +42,7 @@ namespace InfruStructure.Migrations
 
                     b.HasIndex("User2Id");
 
-                    b.ToTable("converstations");
+                    b.ToTable("conversations");
                 });
 
             modelBuilder.Entity("Doamin.Entities.ChatEntites.Messages", b =>
@@ -57,7 +57,7 @@ namespace InfruStructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<int?>("ConverstationId")
+                    b.Property<int?>("ConversationId")
                         .HasColumnType("int");
 
                     b.Property<int>("ResiverId")
@@ -69,13 +69,18 @@ namespace InfruStructure.Migrations
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ConverstationId");
+                    b.HasIndex("ConversationId");
 
                     b.HasIndex("ResiverId");
 
                     b.HasIndex("SenderId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Messages");
                 });
@@ -108,21 +113,35 @@ namespace InfruStructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<bool>("IsOnline")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.Property<string>("Password")
-                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProfileBio")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProfileImageUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RoleName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserEmail")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.HasKey("Id");
 
@@ -160,7 +179,7 @@ namespace InfruStructure.Migrations
                     b.ToTable("UserSelectedRoles");
                 });
 
-            modelBuilder.Entity("Doamin.Entities.ChatEntites.Converstation", b =>
+            modelBuilder.Entity("Doamin.Entities.ChatEntites.Conversation", b =>
                 {
                     b.HasOne("Doamin.Entities.UserEntities.User", "User1")
                         .WithMany()
@@ -181,9 +200,9 @@ namespace InfruStructure.Migrations
 
             modelBuilder.Entity("Doamin.Entities.ChatEntites.Messages", b =>
                 {
-                    b.HasOne("Doamin.Entities.ChatEntites.Converstation", "Converstation")
+                    b.HasOne("Doamin.Entities.ChatEntites.Conversation", "Conversation")
                         .WithMany("messages")
-                        .HasForeignKey("ConverstationId")
+                        .HasForeignKey("ConversationId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Doamin.Entities.UserEntities.User", "Resiver")
@@ -198,7 +217,11 @@ namespace InfruStructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Converstation");
+                    b.HasOne("Doamin.Entities.UserEntities.User", null)
+                        .WithMany("Messages")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Conversation");
 
                     b.Navigation("Resiver");
 
@@ -224,7 +247,7 @@ namespace InfruStructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Doamin.Entities.ChatEntites.Converstation", b =>
+            modelBuilder.Entity("Doamin.Entities.ChatEntites.Conversation", b =>
                 {
                     b.Navigation("messages");
                 });
@@ -236,6 +259,8 @@ namespace InfruStructure.Migrations
 
             modelBuilder.Entity("Doamin.Entities.UserEntities.User", b =>
                 {
+                    b.Navigation("Messages");
+
                     b.Navigation("userSelectedRoles");
                 });
 #pragma warning restore 612, 618

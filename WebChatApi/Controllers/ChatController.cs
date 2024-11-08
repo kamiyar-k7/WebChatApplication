@@ -125,12 +125,16 @@ public class ChatController : ControllerBase
 
     [HttpGet("[Action]/{UserId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<List<OtherUserDto>>> GetUserConverstation(int UserId)
+    public async Task<ActionResult<List<ConversationDto>>> GetUserConverstations(int UserId)
     {
         try
         {
             var cons = await _chatservice.GetUserConversations(UserId);
-            return Ok(cons);
+            
+                return Ok(cons);
+         
+            
+           
         }
         catch (Exception ex)
         {

@@ -29,22 +29,15 @@ public class ChatRepository : IChatRepository
 
     public async Task AddMessage(Messages messages)
     {
-        await _context.Messages.AddAsync(messages);
-        await SaveChanges();
+       
+            await _context.Messages.AddAsync(messages);
+            await SaveChanges();
+        
+       
+     
     }
 
-    public async Task<List<Messages>> GetMessagesBetweenUsers(int currenUser, int OtherUser)
-    {
-        return await _context.Messages
-            .Include(m => m.Sender)
-            .Include(m => m.Resiver)
-            .Where(m =>
-                (m.SenderId == currenUser && m.ResiverId == OtherUser) ||
-                (m.SenderId == OtherUser && m.ResiverId == currenUser))
-            .OrderBy(m => m.Timestamp)
-            .AsQueryable().AsNoTracking().ToListAsync();
-    }
-
+  
 
 
 }

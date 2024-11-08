@@ -1,8 +1,9 @@
 ﻿@page "/chatpage/{id:int}"
 @layout ChatLayout
 @inject NavigationManager _navmanager;
-@inject IPrivateChatService _chatservice
-@inject AuthStateProvider _state
+@inject IPrivateChatService _chatservice;
+@inject AuthStateProvider _state;
+@inject IJSRuntime JS;
 @attribute [Authorize]
 
 <!--top app bar-->
@@ -28,7 +29,7 @@
         </MudItem>
 
         <MudItem>
-            @if(otherUserDto.Id == CurrntUserId)
+            @if (otherUserDto.Id == CurrntUserId)
             {
                 <MudText Class="h6 fw-bold">Saved Messages</MudText>
             }
@@ -37,8 +38,8 @@
                 <MudText Class="h6 fw-bold">@otherUserDto.UserName</MudText>
                 <MudText Class="fw-light">Online</MudText>
             }
-            
-       
+
+
         </MudItem>
 
         <MudSpacer />
@@ -51,9 +52,8 @@
 </MudAppBar>
 
 <!-- chats -->
-<MudMainContent Class="h-100 overflow-hidden" Style="padding-bottom:110px;  padding-top:20px;">
-
-
+<MudMainContent  Class="overflow-auto overflow-x-hidden" Style="height:calc(100vh - 170px); padding-top:20px;">
+     
     @if (ListOfMessages.Any())
     {
         @foreach (var message in ListOfMessages)
@@ -69,7 +69,8 @@
                             <pre Style="white-space: pre-wrap; word-break: break-word; direction: @GetDirection(message.Content)">@message.Content</pre>
                         </MudText>
                         <MudDivider />
-                        <time Class="px-1 text-white">@message.Timestamp</time>
+                        <time Class="px-1 text-white">@string.Format("{0:dd/MM/yyyy HH:mm}", message.Timestamp) </time>
+
                     </MudItem>
                 </MudGrid>
             }
@@ -102,13 +103,14 @@
                     </MudItem>
                 </MudGrid>
             }
-
-          
+            
         }
+     
     }
+
     else
     {
-        <MudGrid Class="d-flex align-items-center justify-content-center vh-100 overflow-hidden m-0">
+        <MudGrid Class="d-flex align-items-center justify-content-center vh-100 m-0">
             <MudItem xs="12" Class="d-flex align-items-center justify-content-center text-center">
                 <MudText Class="text-white bg-dark">
                     You Have No Messages Here
@@ -118,8 +120,8 @@
             </MudItem>
         </MudGrid>
     }
+  
 
-    <a id="bottom"></a>
 </MudMainContent>
 
 <!--Bottom app bar-->
@@ -178,65 +180,65 @@
 
 
 @code {
-
-    private List<MessageDto> ListOfMessages = new();
-
-    private OtherUserDto? otherUserDto { get; set; } = new OtherUserDto();
-
-    private int conId = 0;
-
     [Parameter]
     public int id { get; set; }
 
-    private int CurrntUserId;
 
+    private List<MessageDto> ListOfMessages = new();
+    private MessageDto model = new MessageDto();
+    private OtherUserDto? otherUserDto { get; set; } = new OtherUserDto();
+    private int conId = 0;
+    private int CurrntUserId;
     HubConnection? HubConnection;
+
 
     protected override async Task OnInitializedAsync()
     {
+        #region get details 
         //get current user
         var claims = await _state.GetClaims();
-        CurrntUserId = int.Parse( claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value);
-
+        CurrntUserId = int.Parse(claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value);
 
         //get other user
-       otherUserDto = await _chatservice.GetOtherUserDto(id);
-
+        otherUserDto = await _chatservice.GetOtherUserDto(id);
 
         //get conversation id
         conId = await _chatservice.IsConversationExist(CurrntUserId, id);
+        #endregion
 
 
         ListOfMessages = conId != 0 ? await _chatservice.GetListOfMessages(conId, id.ToString()) : new();
 
-
-        #region    Hub 
+        #region    Hub
         HubConnection = new HubConnectionBuilder()
           .WithUrl("https://localhost:7019/ChatHub")
           .WithAutomaticReconnect()
           .Build();
 
-  
+
         HubConnection.On<MessageDto>("ReceiveMessage", async message =>
         {
             await InvokeAsync(async () =>
             {
 
                 ListOfMessages = await _chatservice.GetListOfMessages(conId, id.ToString());
+            
                 StateHasChanged();
+          
 
             });
         });
 
         await HubConnection.StartAsync();
+  
         #endregion
-      
+
 
     }
 
     //send meesage
 
-    private MessageDto model = new MessageDto();
+  
 
     private async Task SendMessage()
     {
@@ -246,7 +248,7 @@
             model.ResiverId = id;
             if (conId == 0)
             {
-                conId = await _chatservice.CreateConverstation( CurrntUserId, id);
+                conId = await _chatservice.CreateConverstation(CurrntUserId, id);
 
 
             }
@@ -255,8 +257,9 @@
 
             await HubConnection.SendAsync("SendMessage", model);
             model.Content = string.Empty;
-
+         
             StateHasChanged();
+ 
         }
 
         catch (ApiException ex)
@@ -267,15 +270,14 @@
     }
 
 
-
-
     private string GetDirection(string content)
     {
-        
+
         return content.Any(c => char.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.OtherLetter) ? "rtl" : "ltr";
     }
-   
 
+ 
+  
 
     private void BackToHome()
     {
