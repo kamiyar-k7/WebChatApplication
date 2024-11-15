@@ -3,7 +3,6 @@ using Application.Services.Implentation;
 using Application.Services.Interfaces;
 using Application.SignalR;
 using Application.Validation;
-using Application.ViewModel_And_Dto.Dto.UserSide;
 using Doamin.IRepository.ChatPart;
 using Doamin.IRepository.UserPart;
 using FluentValidation;
@@ -32,22 +31,7 @@ builder.Host.UseSerilog((context, conf) => conf.WriteTo.Console().ReadFrom.Confi
 
 #endregion
 
-#region Cors
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.WithOrigins("https://localhost:7019/").
-          AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials()
-              .SetIsOriginAllowed(origin => true);
-    });
-});
-
-
-
-#endregion
+builder.Services.AddMemoryCache();
 
 #region Mapper
 builder.Services.AddAutoMapper(typeof(MapperConfig));
@@ -125,7 +109,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors();
 
 app.UseHttpsRedirection();
 

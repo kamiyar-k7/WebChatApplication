@@ -40,10 +40,16 @@ public class UserRepository : IUserRepository
 
     }
 
-    public async Task<bool> IsExist(string email)
+    public async Task<bool> IsEmailExist(string email)
     {
         return await _DbContext.Users.AnyAsync(x => x.UserEmail == email);
     }
+
+    public async Task<bool> IsUserNameExist(string username)
+    {
+        return await _DbContext.Users.AnyAsync(x => x.UserName == username);
+    }
+
     #endregion
 
 

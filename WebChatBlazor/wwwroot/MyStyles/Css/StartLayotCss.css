@@ -1,0 +1,32 @@
+﻿html, body {
+    height: 100%;
+    margin: 0;
+    background-color: black;
+}
+
+.background {
+    background-image: url("");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background: radial-gradient(circle at 10% 20%, rgb(0, 0, 0) 0%, rgb(64, 64, 64) 90.2%);
+ 
+}
+
+.login {
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    box-shadow: 30px 4px 20px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    color: #fff;
+}
+
+
+.text-primary:hover {
+    text-decoration: underline;
+}
+
+
+

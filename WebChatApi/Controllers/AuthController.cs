@@ -1,8 +1,6 @@
 ﻿using Application.Services.Interfaces;
 using Application.ViewModel_And_Dto.Dto.UserSide;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace WebChatApi.Controllers;
 
@@ -18,17 +16,17 @@ public class AuthController : ControllerBase
     }
     #endregion
 
+    #region SignUp
 
-
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [HttpPost("[Action]")]
-    public async Task<IActionResult> SignUp(UserSignUpDto userDto)
+    public async Task<IActionResult> GetEmailForSignUp(UserSignUpDto userDto)
     {
 
         try
         {
-            await _userServices.SignUp(userDto);
-            return CreatedAtAction(nameof(SignUp), new { userDto.UserName });
+            await _userServices.GetEmailForSignUp(userDto);
+            return Ok(userDto.UserEmail);
         }
         catch (Exception ex)
         {
@@ -41,6 +39,26 @@ public class AuthController : ControllerBase
 
     [ProducesResponseType(StatusCodes.Status200OK)]
     [HttpPost("[Action]")]
+    public async Task<ActionResult<bool>> VerifyAndSignUser(UserVerifyDto verifyDto)
+    {
+        try
+        {
+            var res = await _userServices.VerifyCode(verifyDto);
+            return Ok(res);
+        }
+        catch (Exception ex)
+        {
+
+            return Unauthorized(ex.Message);
+        }
+
+
+    }
+
+    #endregion
+
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [HttpPost("[Action]")]
     public async Task<ActionResult<string>> SignIn(UserSignInDto userSignInDto)
     {
         try
@@ -49,7 +67,7 @@ public class AuthController : ControllerBase
             var token = await _userServices.SignIn(userSignInDto);
             if (token == null)
             {
-                return Unauthorized("The Error or Password Are Incorecct!");
+                return Unauthorized("The Email or Password Are Incorecct!");
             }
             return Ok(token);
 
@@ -60,7 +78,23 @@ public class AuthController : ControllerBase
 
         }
 
-
     }
+
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [HttpPost("[Action]")]
+    public async Task<IActionResult> ResendVerifyCode(string UserEmail)
+    {
+        try
+        {
+            await _userServices.ResenVerifyCode(UserEmail);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+
+            return BadRequest(ex.Message);
+        }
+    }
+
 
 }
