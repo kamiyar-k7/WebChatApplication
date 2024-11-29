@@ -1,13 +1,8 @@
-﻿
-using Application.Services.Interfaces;
-using Application.SignalR;
+﻿using Application.Services.Interfaces;
 using Application.ViewModel_And_Dto.Dto.UserSide;
 using Doamin.Entities.ChatEntites;
 using Doamin.IRepository.ChatPart;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore.Query;
-using Microsoft.VisualBasic;
+using Doamin.Entities.UserEntities;
 
 namespace Application.Services.Implentation;
 
@@ -37,8 +32,8 @@ public class ChatServices : IChatServices
             ResiverId = message.ResiverId,
             SenderId = message.SenderId,
             Timestamp = DateTime.Now,
-            ConverstationId = message.ConverstationId,
-
+            ConversationId = message.ConverstationId,
+            IsSend = true
         };
 
         await _chatRepo.AddMessage(newmessage);
@@ -49,24 +44,24 @@ public class ChatServices : IChatServices
 
     #endregion
 
-    #region Converstation Room
+    #region Converstation 
 
     public async Task<int> GetConversationId(int user1Id, int user2Id)
     {
 
-       return await _converstationRepo.GetCoversationId(user1Id, user2Id);
+        return await _converstationRepo.GetCoversationId(user1Id, user2Id);
     }
 
     public async Task<int> CreateConverstation(int user1Id, int user2Id)
     {
 
-        Converstation converstation = new Converstation()
+        Conversation converstation = new Conversation()
         {
             User1Id = user1Id,
             User2Id = user2Id,
         };
 
-       var id = await _converstationRepo.CreateConverstation(converstation);
+        var id = await _converstationRepo.CreateConverstation(converstation);
         return id;
     }
 
@@ -88,7 +83,7 @@ public class ChatServices : IChatServices
                 ResiverId = message.ResiverId,
                 ResiverName = message.Resiver.UserName,
                 SenderName = message.Sender.UserName,
-
+                IsSend = message.IsSend,
             };
 
             messagelist.Add(messageDto);
@@ -100,39 +95,46 @@ public class ChatServices : IChatServices
 
     }
 
-    public async Task<List<OtherUserDto>> GetUserConversations(int userId)
+    public async Task<List<ConversationDto>> GetUserConversations(int userId)
     {
 
-        var usersid = await _converstationRepo.GetIdOFOtherUserInConversation(userId);
-        if (usersid != null)
+        var ConDetailsList = await _converstationRepo.GetConverstationDetails(userId);
+
+        if (ConDetailsList != null && ConDetailsList.Any())
         {
-            var users = await _converstationRepo.GetUserConversations(usersid);
 
-            List<OtherUserDto> cons = new List<OtherUserDto>();
 
-            foreach (var userdetails in users)
+            List<ConversationDto> cons = new List<ConversationDto>();
+
+            foreach (var details in ConDetailsList)
             {
+                var otherUser = details.User1 ?? details.User2;
+                var otherUserId = otherUser?.Id ?? userId;
+                var otherUserName = otherUser?.UserName ?? "Saved Messages";
 
-                OtherUserDto otherUserDto = new OtherUserDto()
+
+                ConversationDto condetails = new ConversationDto()
                 {
-                    Id = userdetails.Id,
-                    UserName = userdetails.UserName,
+                    ConversationId = details.Id,
+                    LastMessage = details?.messages?.FirstOrDefault()?.Content ?? string.Empty,
+                    OtherUserId = otherUserId,
+                    UserName = otherUserName,
+                    LastMessageTimestamp = details.messages.FirstOrDefault()?.Timestamp ?? DateTime.UtcNow
+
+
+
 
                 };
-                cons.Add(otherUserDto);
+                cons.Add(condetails);
+            };
 
-            }
 
-            return cons;
+            return cons = cons.OrderByDescending(c => c.LastMessageTimestamp).ToList();
         }
         else
         {
-            return null;
+            return new List<ConversationDto>();
         }
-
-
-
-
     }
 
     #endregion

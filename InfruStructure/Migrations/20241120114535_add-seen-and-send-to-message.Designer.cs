@@ -12,18 +12,41 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InfruStructure.Migrations
 {
     [DbContext(typeof(ChatDbContext))]
-    [Migration("20241024001435_Create_database")]
-    partial class Create_database
+    [Migration("20241120114535_add-seen-and-send-to-message")]
+    partial class addseenandsendtomessage
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Doamin.Entities.ChatEntites.Conversation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("User1Id")
+                        .HasColumnType("int");
+
+                    b.Property<int>("User2Id")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("User1Id");
+
+                    b.HasIndex("User2Id");
+
+                    b.ToTable("conversations");
+                });
 
             modelBuilder.Entity("Doamin.Entities.ChatEntites.Messages", b =>
                 {
@@ -37,6 +60,15 @@ namespace InfruStructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<int?>("ConversationId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsSeen")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSend")
+                        .HasColumnType("bit");
+
                     b.Property<int>("ResiverId")
                         .HasColumnType("int");
 
@@ -46,11 +78,18 @@ namespace InfruStructure.Migrations
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ConversationId");
 
                     b.HasIndex("ResiverId");
 
                     b.HasIndex("SenderId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Messages");
                 });
@@ -83,21 +122,35 @@ namespace InfruStructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<bool>("IsOnline")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.Property<string>("Password")
-                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProfileBio")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProfileImageUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RoleName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserEmail")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.HasKey("Id");
 
@@ -135,8 +188,32 @@ namespace InfruStructure.Migrations
                     b.ToTable("UserSelectedRoles");
                 });
 
+            modelBuilder.Entity("Doamin.Entities.ChatEntites.Conversation", b =>
+                {
+                    b.HasOne("Doamin.Entities.UserEntities.User", "User1")
+                        .WithMany()
+                        .HasForeignKey("User1Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Doamin.Entities.UserEntities.User", "User2")
+                        .WithMany()
+                        .HasForeignKey("User2Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User1");
+
+                    b.Navigation("User2");
+                });
+
             modelBuilder.Entity("Doamin.Entities.ChatEntites.Messages", b =>
                 {
+                    b.HasOne("Doamin.Entities.ChatEntites.Conversation", "Conversation")
+                        .WithMany("messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Doamin.Entities.UserEntities.User", "Resiver")
                         .WithMany()
                         .HasForeignKey("ResiverId")
@@ -148,6 +225,12 @@ namespace InfruStructure.Migrations
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Doamin.Entities.UserEntities.User", null)
+                        .WithMany("Messages")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Conversation");
 
                     b.Navigation("Resiver");
 
@@ -173,6 +256,11 @@ namespace InfruStructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Doamin.Entities.ChatEntites.Conversation", b =>
+                {
+                    b.Navigation("messages");
+                });
+
             modelBuilder.Entity("Doamin.Entities.UserEntities.Role", b =>
                 {
                     b.Navigation("userSelectedRoles");
@@ -180,6 +268,8 @@ namespace InfruStructure.Migrations
 
             modelBuilder.Entity("Doamin.Entities.UserEntities.User", b =>
                 {
+                    b.Navigation("Messages");
+
                     b.Navigation("userSelectedRoles");
                 });
 #pragma warning restore 612, 618

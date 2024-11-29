@@ -5,8 +5,10 @@ namespace Application.Services.Interfaces;
 public interface IUserServices
 {
     #region Auth
+    Task GetEmailForSignUp(UserSignUpDto userSignUpDto);
+    Task<bool> VerifyCode(UserVerifyDto verifyDto);
+    Task ResenVerifyCode(string UserEmial);
 
-    Task SignUp(UserSignUpDto userDto);
 
     Task<string> SignIn(UserSignInDto userDto);
     #endregion

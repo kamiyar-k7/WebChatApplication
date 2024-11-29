@@ -3,7 +3,6 @@ using Application.Services.Implentation;
 using Application.Services.Interfaces;
 using Application.SignalR;
 using Application.Validation;
-using Application.ViewModel_And_Dto.Dto.UserSide;
 using Doamin.IRepository.ChatPart;
 using Doamin.IRepository.UserPart;
 using FluentValidation;
@@ -32,22 +31,7 @@ builder.Host.UseSerilog((context, conf) => conf.WriteTo.Console().ReadFrom.Confi
 
 #endregion
 
-#region Cors
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.WithOrigins("https://localhost:7019/").
-          AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials()
-              .SetIsOriginAllowed(origin => true);
-    });
-});
-
-
-
-#endregion
+builder.Services.AddMemoryCache();
 
 #region Mapper
 builder.Services.AddAutoMapper(typeof(MapperConfig));
@@ -80,6 +64,11 @@ builder.Services.AddScoped<IValidator<object>, UserDtoValidator>();
 
 #endregion
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", b => b.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
+});
+
 
 #region JWT
 
@@ -97,10 +86,10 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ClockSkew = TimeSpan.Zero,
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-        ValidAudience = builder.Configuration["JwtSettings:Audiece"],
+        ValidAudience = builder.Configuration["JwtSettings:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
     };
-
+    
 });
 
 #endregion
@@ -125,10 +114,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors();
-
 app.UseHttpsRedirection();
 
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -1,105 +1,108 @@
 ﻿@page "/signin"
+@using System.ComponentModel.DataAnnotations
 @layout StartLayout
 @inject IAuthenticationService _userservice
 @inject NavigationManager _navmanager
 
 
-<div class="container">
-    <div class="row justify-content-center align-items-center h-100" style="min-height:100vh;">
-        <div class="col-12 col-sm-9 col-md-8 col-lg-6 col-xl-5 col-xxl-6">
+<MudMainContent Style=" height: 100vh; " Class="d-flex  justify-content-center align-items-center background">
 
-            <EditForm Model="userdto" OnValidSubmit="HandleSignIn">
-              
+    <MudGrid Class="login d-flex  justify-content-center align-items-center  p-5 rounded " Style="">
 
-                <div class="bg-secondary rounded-3 p-4 p-sm-5 my-4 mx-3" style="background-color: rgba(108, 117, 125, 0.5) !important;">
+        <!-- Title -->
+        <MudText Class="h2 mb-4" Style="font-size:1.8rem; font-weight:600;">Login</MudText>
 
-
-                    <h4 class="text-center mb-4 text-uppercase fw-bold"> Sign In</h4>
-
-                    <div class="form-group">
-
-                        <label for="UserEmail">UserEmail</label>
-                        <InputText class="form-control" @bind-Value="userdto.UserEmail" required></InputText>
-                        @if (!string.IsNullOrEmpty(GetErrorForField("UserEmail")))
-                        {
-                            <div style="background-color:black;">  <p class="text-danger">    @GetErrorForField("UserEmail")</p> </div>
-                        }
-                    </div>
-                    <div class="form-group">
-                        <label for="Password">Password</label>
-                        <div class="input-group">
-                            <InputText type="@(_showPassword ? "text" : "password")"
-                                       class="form-control"
-                                       @bind-Value="userdto.Password">
-                            </InputText>
-                            <button type="button" class="btn btn-secondary" @onclick="TogglePasswordVisibility">
-                                <i class="@(_showPassword ? "fas fa-eye-slash" : "fas fa-eye")"></i>
-                            </button>
-                        </div>
-                        @if (!string.IsNullOrEmpty(GetErrorForField("Password")))
-                        {
-                            <div style="background-color:black;">
-                                <p class="text-danger">@GetErrorForField("Password")</p>
-                            </div>
-                        }
-                    </div>
-
-                    <br />
-                    @if (!string.IsNullOrEmpty(message))
-                    {
-                        <div class="alert alert-danger">
-                            <p>
-                                @message
-                            </p>
-                        </div>
-                    }
-                    <div class="d-flex flex-column flex-md-row gap-3">
-                        @*    <button type="submit" class="btn btn-primary py-3 w-100">Submit</button> *@
-                        <SpinnerButton isbuttonworking="BSpinnerWorking">
-                            Submit
-                        </SpinnerButton>
-                        <a href="/Start" class="btn btn-light py-3 w-100">Cancel</a>
-                    </div>
-                    <br />
-                    <a href="/SignUp" class="text-info">Create A New  Acoount?</a>
-
-                </div>
-            </EditForm>
+        <!-- Login Form -->
+        <EditForm Model="userdto" class="col-8" OnValidSubmit="HandleSignIn">
+            <MudItem Class="mb-3 ">
+                <MudTextField T="string"
+                              Label="Email"
+                              @bind-Value="userdto.UserEmail"
+                              Placeholder="Email@example.com"
+                              Variant="Variant.Filled"
+                              Class="white-textfield"
+                              Required
+                              RequiredError="Email is required!"
+                              Validation="@(new EmailAddressAttribute() {ErrorMessage="The Email Address Is Invalid"})" />
+            </MudItem>
+            @if (!string.IsNullOrEmpty(GetErrorForField("UserEmail")))
+            {
+                <MudText Class="text-danger">@GetErrorForField("UserEmail")</MudText>
+            }
 
 
-        </div>
+            <MudItem Class=" mb-3">
+                <MudTextField T="string" Label="Password" @bind-Value="userdto.Password"
+                              Variant="Variant.Filled"
+                              InputType="@(showPassword ? InputType.Text : InputType.Password)"
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@(showPassword ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff)"
+                              OnAdornmentClick="TogglePasswordVisibility"
+                              AdornmentAriaLabel="Show Password"
+                              AdornmentColor="Color.Primary"
+                              Required
+                              Class="white-textfield" />
+            </MudItem>
+            @if (!string.IsNullOrEmpty(GetErrorForField("Password")))
+            {
+                <MudText Class="text-danger">@GetErrorForField("Password")</MudText>
+            }
 
 
-    </div>
-</div>
+            @if (BSpinnerWorking)
+            {
+                <MudButton Disabled
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Class="w-100 mb-3"
+                           Style="height: 50px;">
+
+                    <MudProgressCircular Color="Color.Primary"
+                                         Size="Size.Medium" Indeterminate />
+                </MudButton>
+
+            }
+            else
+            {
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           ButtonType="ButtonType.Submit"
+                           Class="w-100 mb-3"
+                           Style="height: 50px;"> Submit </MudButton>
+            }
+
+            @if (!string.IsNullOrEmpty(message))
+            {
+                <MudText Class="bg-danger">@message</MudText>
+            }
+
+            <!-- Register Link -->
+            <MudText Class="text-center">
+                Don't have an account? <MudLink Href="/Signup" Class="text-primary">Register</MudLink>
+            </MudText>
+        </EditForm>
+    </MudGrid>
+</MudMainContent>
 
 
 @code {
-    
-
 
 
     private UserSignInDto userdto = new UserSignInDto();
     private string message = string.Empty;
     private Dictionary<string, List<string>> dictionaryErrors = new Dictionary<string, List<string>>();
     private bool BSpinnerWorking = false;
-    private bool _showPassword = false;
 
-           
+
+    private bool showPassword = false;
 
     private void TogglePasswordVisibility()
     {
-        _showPassword = !_showPassword;
+        showPassword = !showPassword;
     }
 
-    private string GetErrorForField(string fieldName)
-    {
-        if (dictionaryErrors.ContainsKey(fieldName))
-        {
-            return string.Join(",", dictionaryErrors[fieldName]);
-        }
-        return string.Empty;
-    }
+
+
 
 
     public async Task HandleSignIn()
@@ -108,22 +111,21 @@
         {
             BSpinnerWorking = true;
             await _userservice.SignIn(userdto);
-          
-         
 
             _navmanager.NavigateTo("/");
+
         }
         catch (ApiException ex)
         {
             BSpinnerWorking = false;
 
-            var error = await  ExceptionHandler.HandleApiException(ex);
+            var error = await ExceptionHandler.HandleApiException(ex);
 
-            if(error is Dictionary<string , List<string>> errors)
+            if (error is Dictionary<string, List<string>> errors)
             {
                 dictionaryErrors = errors;
             }
-            else if(error is ExeptionDto exdto)
+            else if (error is ExeptionDto exdto)
             {
                 message = $"{exdto.Message}";
 
@@ -136,8 +138,31 @@
 
         }
     }
+
+
+    private string GetErrorForField(string fieldName)
+    {
+        if (dictionaryErrors.ContainsKey(fieldName))
+        {
+            return string.Join(",", dictionaryErrors[fieldName]);
+        }
+        return string.Empty;
+    }
 }
 
 
 
 
+<style>
+    .white-textfield input {
+        color: white !important;
+    }
+
+    .white-textfield label {
+        color: rgba(89, 74, 226, 1) !important;
+    }
+
+    .white-textfield ::placeholder {
+        color: white !important;
+    }
+</style>

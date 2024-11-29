@@ -11,7 +11,7 @@ public class AuthenticationService : IAuthenticationService
     private readonly ILocalStorageService _localStorage;
 
     #region Ctor
-    public AuthenticationService(AuthenticationStateProvider authenticationState ,IClient client, ILocalStorageService localStorage)
+    public AuthenticationService(AuthenticationStateProvider authenticationState, IClient client, ILocalStorageService localStorage)
     {
         _authprovider = authenticationState;
         _client = client;
@@ -19,11 +19,27 @@ public class AuthenticationService : IAuthenticationService
     }
     #endregion
 
+  
+
     public async Task SignUp(UserSignUpDto userdto)
     {
-        await _client.SignUpAsync(userdto);
+        /* useremail =*/
+        await _client.GetEmailForSignUpAsync(userdto);
 
     }
+
+    public async Task ResendCode(string useremail)
+    {
+        await _client.ResendVerifyCodeAsync(useremail);
+    }
+
+    public async Task<bool> VerifyCode(UserVerifyDto verifyDto)
+    {
+        var res = await _client.VerifyAndSignUserAsync(verifyDto);
+        return res;
+    }
+
+
     public async Task SignIn(UserSignInDto userdto)
     {
         var token = await _client.SignInAsync(userdto);
@@ -32,7 +48,7 @@ public class AuthenticationService : IAuthenticationService
         await _localStorage.SetItemAsync("token", token);
 
         //change auth of app
-         await   ((AuthStateProvider)_authprovider).LoggedIn();
+        await ((AuthStateProvider)_authprovider).LoggedIn();
 
     }
 
@@ -46,5 +62,5 @@ public class AuthenticationService : IAuthenticationService
         }
     }
 
-   
+
 }

@@ -1,0 +1,232 @@
+﻿@page "/verifyuser/{userEmail}"
+@layout StartLayout
+@inject IAuthenticationService _UserService
+@inject NavigationManager _navmanager
+
+
+<MudMainContent Style=" height: 100vh; " Class="d-flex  justify-content-center align-items-center background">
+
+    <MudGrid Class="login d-flex  justify-content-center align-items-center  p-5 rounded ">
+
+        <!-- Title -->
+        <MudText Class="h2 mb-2 text-center" Style="font-size: 1.8rem; font-weight: 600;">
+            Verify Your Email
+        </MudText>
+
+
+        <MudText Class="mb-3 text-center" Style="font-size: 1.1rem;">
+            We have sent a code to <strong>@userEmail</strong>. Please enter it below to verify your email address.
+        </MudText>
+
+        <!-- Login Form -->
+
+        <EditForm Model="model" OnValidSubmit="HandleVerify" class="col-8">
+
+
+
+
+            <MudItem Class="mb-3 ">
+                <MudTextField T="int?" Label="Verify Code" @bind-Value="model.Code" Placeholder="123456" Variant="Variant.Filled"
+                              Required RequiredError="Code is required!" Class="white-textfield" />
+            </MudItem>
+
+
+
+
+            @if (!string.IsNullOrEmpty(message))
+            {
+                if (message.Contains("/signup"))
+                {
+                    <MudText Class="bg-secondary mb-2">
+                        <a href="/signup">
+                            @message
+                        </a>
+                    </MudText>
+                }
+                else
+                {
+                    <MudText Class="bg-danger mb-2"> @message </MudText>
+                }
+
+            }
+
+
+            @if (BSpinnerWorking)
+            {
+                <MudButton Disabled
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Class="w-100 mb-3"
+                           Style="height: 50px;">
+
+                    <MudProgressCircular Color="Color.Primary"
+                                         Size="Size.Medium" Indeterminate />
+                </MudButton>
+
+            }
+            else
+            {
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           ButtonType="ButtonType.Submit"
+                           Class="w-100 mb-3"
+                           Style="height: 50px;"> Submit </MudButton>
+            }
+
+
+            @if (_currentCount > 0)
+            {
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Tertiary"
+                           FullWidth="true"
+                           Class="mt-2 w-100 mb-3 white-text"
+                           Style="height: 50px;"
+                           Disabled="@(_currentCount > 0)">
+                    Resend Code In @_currentCount
+                </MudButton>
+            }
+            else
+            {
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Tertiary"
+                           FullWidth="true"
+                           Class="mt-2 w-100 mb-3 "
+                           Style="height: 50px;"
+                           OnClick="ResendCode">
+                    Resend Code
+                </MudButton>
+            }
+
+
+
+        </EditForm>
+
+    </MudGrid>
+
+</MudMainContent>
+
+
+
+
+@code {
+    private UserVerifyDto model { get; set; } = new UserVerifyDto();
+
+
+
+    [Parameter]
+    public string userEmail { get; set; }
+
+    bool BSpinnerWorking = false;
+
+    private string message = string.Empty;
+
+    private int _currentCount = 60;
+    private System.Timers.Timer _timer;
+
+    bool resendButton = false;
+
+    protected override Task OnInitializedAsync()
+    {
+
+        resendButton = false; // Reset resend button visibility
+        _timer = new Timer
+            {
+                Interval = 1000,
+                Enabled = true
+            };
+
+        _timer.Elapsed += async (object? sender, ElapsedEventArgs e) =>
+        {
+            if (_currentCount > 0)
+            {
+                _currentCount--;
+                await InvokeAsync(StateHasChanged);
+            }
+
+            if (_currentCount == 0)
+            {
+                resendButton = true;
+                _timer.Stop();
+                await InvokeAsync(StateHasChanged);
+            }
+        };
+
+
+        return base.OnInitializedAsync();
+    }
+
+    private async Task HandleVerify()
+    {
+
+        BSpinnerWorking = true;
+        try
+        {
+            model.UserEmail = userEmail;
+            if (model.Code != 0)
+            {
+                var res = await _UserService.VerifyCode(model);
+                if (res)
+                {
+                    _navmanager.NavigateTo("/signin");
+                }
+            }
+            else
+            {
+                message = "Code Is nessecery";
+                BSpinnerWorking = false;
+            }
+
+
+        }
+        catch (ApiException ex)
+        {
+            BSpinnerWorking = false;
+            message = ex.Response;
+
+        }
+
+
+
+    }
+
+
+
+    private async Task ResendCode()
+    {
+
+        if (_currentCount == 0)
+        {
+            _currentCount = 60;
+            _timer.Start();
+            await _UserService.ResendCode(userEmail);
+            message = "A new verification code has been sent to your email.";
+
+        }
+        else
+        {
+            message = $"Wait for {_currentCount}";
+
+        }
+
+
+
+
+
+    }
+}
+
+
+<style>
+    .white-textfield input {
+        color: white !important;
+    }
+
+    .white-textfield label {
+        color: rgba(89, 74, 226, 1) !important;
+    }
+
+    .white-textfield ::placeholder {
+        color: white !important;
+    }
+</style>

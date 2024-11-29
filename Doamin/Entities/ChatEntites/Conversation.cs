@@ -4,7 +4,7 @@ using Doamin.Entities.UserEntities;
 
 namespace Doamin.Entities.ChatEntites;
 
-public class Converstation
+public class Conversation
 {
 
     public int Id { get; set; }

@@ -17,7 +17,7 @@ public interface IChatServices
     Task<int> GetConversationId(int user1Id, int user2Id);
     Task<int> CreateConverstation(int user1Id, int user2Id);
     Task<List<MessageDto>> GetConverstationMessages(int conid);
-    Task<List<OtherUserDto>> GetUserConversations(int userId);
+    Task<List<ConversationDto>> GetUserConversations(int userId);
 
     #endregion
 }

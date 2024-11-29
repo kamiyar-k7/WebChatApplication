@@ -1,120 +1,132 @@
 ﻿@page "/signup"
+@using System.ComponentModel.DataAnnotations
 @layout StartLayout
 @inject IAuthenticationService _userservice
 @inject NavigationManager _navmanager
 
 
-<BootStrapModal @ref="bootStrapModal" url="/signin">
-    <headtext>
-        <p class="">Successfull!</p>
-    </headtext>
-    <bodytext>
-        <p class="">U will Dicrect To The SignIn Page Atomatically in : @time Seconds</p>
-    </bodytext>
-</BootStrapModal>
+<MudMainContent Style=" height: 100vh; " Class="d-flex  justify-content-center align-items-center background">
 
-<div class="container">
-    <div class="row justify-content-center align-items-center h-100" style="min-height:100vh;">
+    <MudGrid Class="login d-flex  justify-content-center align-items-center  p-5 rounded " Style="">
 
-        <div class="col-12 col-sm-9 col-md-8 col-lg-6 col-xl-5 col-xxl-6">
+        <!-- Title -->
+        <MudText Class="h2 mb-4" Style="font-size:1.8rem; font-weight:600;">SignUp</MudText>
 
-            <EditForm Model="userdto" OnValidSubmit="HandleSignUp">
-                <ValidationSummary />
-                <DataAnnotationsValidator />
+        <!-- Login Form -->
+        <EditForm Model="userdto" class="col-8" OnValidSubmit="HandleSignUp">
 
-                <div class="bg-secondary rounded-3 p-4 p-sm-5 my-4 mx-3" style="background-color: rgba(108, 117, 125, 0.5) !important;">
+            <MudItem Class="mb-3">
+                <MudTextField T="string"
+                              Label="UseName"
+                              @bind-Value="userdto.UserName"
+                              Placeholder="Example"
+                              Variant="Variant.Filled"
+                              Required
+                              RequiredError="UserName is required!"
+                              Class="white-textfield" />
+            </MudItem>
+            @if (!string.IsNullOrEmpty(GetErrorForField("UserName")))
+            {
+                <MudText Class="text-danger">@GetErrorForField("UserName")</MudText>
+            }
 
+            <MudItem Class="mb-3 ">
+                <MudTextField T="string"
+                              Label="Email"
+                              @bind-Value="userdto.UserEmail"
+                              Placeholder="Email@example.com"
+                              Variant="Variant.Filled"
+                              Required
+                              RequiredError="Email is required!"
+                              Validation="@(new EmailAddressAttribute() {ErrorMessage="The Email Address Is Invalid"})"
+                              Class="white-textfield" />
+            </MudItem>
+            @if (!string.IsNullOrEmpty(GetErrorForField("UserEmail")))
+            {
+                <MudText Class="text-danger">@GetErrorForField("UserEmail")</MudText>
+            }
 
-                    <h4 class="text-center mb-4 text-uppercase fw-bold"> Sign Up</h4>
-
-                    <div class="form-group">
-
-                        <label for="UserName">UserName</label>
-                        <InputText class="form-control" @bind-Value="userdto.UserName" required></InputText>
-                        @if (!string.IsNullOrEmpty(GetErrorForField("UserName")))
-                        {
-                            <div class="text-danger small fw-bold" style="margin-top: 0.25rem; background-color:aliceblue">
-                                @GetErrorForField("UserName")
-                            </div>
-                        }
-                    </div>
-                    <div class="form-group">
-
-                        <label for="UserEmail">UserEmail</label>
-                        <InputText class="form-control" @bind-Value="userdto.UserEmail" required><span class="password-toggle-icon"><i class="fas fa-eye"></i></span></InputText>
-                        @if (!string.IsNullOrEmpty(GetErrorForField("UserEmail")))
-                        {
-                            <div class="text-danger small fw-bold" style="margin-top: 0.25rem; background-color:aliceblue">
-                                @GetErrorForField("UserEmail")
-                            </div>
-                        }
-                    </div>
-                    <div class="form-group">
-                        <label for="Password">Password</label>
-                        <div class="input-group">
-                            <InputText type="@(_showPassword ? "text" : "password")"
-                                       class="form-control"
-                                       @bind-Value="userdto.Password">
-                            </InputText>
-                            <button type="button" class="btn btn-secondary" @onclick="TogglePasswordVisibility">
-                                <i class="@(_showPassword ? "fas fa-eye-slash" : "fas fa-eye")"></i>
-                            </button>
-                        </div>
-                        @if (!string.IsNullOrEmpty(GetErrorForField("Password")))
-                        {
-                            <div style="background-color:black;">
-                                <p class="text-danger">@GetErrorForField("Password")</p>
-                            </div>
-                        }
-                    </div>
-                    <br />
-                    @if (!string.IsNullOrEmpty(message))
-                    {
-                        <div class="alert alert-danger">
-                            <p>
-                                @message
-                            </p>
-                        </div>
-                    }
-                    <div class="d-flex flex-column flex-md-row gap-3">
-
-                        <SpinnerButton isbuttonworking=BSpinnerWorking>
-                            Submit
-                        </SpinnerButton>
-                        <a href="/start" class="btn btn-light py-3 w-100">Cancel</a>
-                    </div>
-                    <br />
-                    <a href="/signIn" class="text-info">Alreade Have An Acoount?</a>
-
-                </div>
-            </EditForm>
-
-
-        </div>
-
-
-    </div>
-</div>
+            <MudItem Class=" mb-3">
+                <MudTextField T="string" Label="Password" @bind-Value="userdto.Password"
+                              Variant="Variant.Filled"
+                              InputType="@(showPassword ? InputType.Text : InputType.Password)"
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@(showPassword ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff)"
+                              OnAdornmentClick="TogglePasswordVisibility"
+                              AdornmentAriaLabel="Show Password"
+                              AdornmentColor="Color.Error"
+                              Required
+                              RequiredError="Password Is Required!"
+                              Class="white-textfield" />
+            </MudItem>
+            @if (!string.IsNullOrEmpty(GetErrorForField("Password")))
+            {
+                <MudText Class="text-danger">@GetErrorForField("Password")</MudText>
+            }
 
 
 
+            @if (BSpinnerWorking)
+            {
+                <MudButton Disabled
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Class="w-100 mb-3"
+                           Style="height: 50px;">
+
+                    <MudProgressCircular Color="Color.Primary"
+                                         Size="Size.Medium" Indeterminate />
+                </MudButton>
+
+            }
+            else
+            {
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           ButtonType="ButtonType.Submit"
+                           Class="w-100 mb-3"
+                           Style="height: 50px;"> Submit </MudButton>
+            }
+
+
+
+
+         
+            @if (!string.IsNullOrEmpty(message))
+            {
+                <MudText Class="bg-danger">@message</MudText>
+            }
+
+
+            <MudText Class="text-center text-white">
+                Already have an account? <MudLink Href="/signin" Class="text-primary">Log In</MudLink>
+            </MudText>
+        </EditForm>
+
+
+    </MudGrid>
+
+</MudMainContent>
 
 
 
 @code {
+
+    private bool isLoading = false;
+
+
     private UserSignUpDto userdto = new UserSignUpDto();
     private string message = string.Empty;
     private bool BSpinnerWorking = false;
-    private BootStrapModal bootStrapModal;
-    private int time = 5;
+
     private Dictionary<string, List<string>> dictionaryErrors = new Dictionary<string, List<string>>();
 
 
-    private bool _showPassword = false;
+    private bool showPassword = false;
 
     private void TogglePasswordVisibility()
     {
-        _showPassword = !_showPassword;
+        showPassword = !showPassword;
     }
 
     public async Task HandleSignUp()
@@ -128,22 +140,7 @@
 
             await _userservice.SignUp(userdto);
 
-            await bootStrapModal.OpenModal();
-
-            time = 5;
-            while (time > 0)
-            {
-                await Task.Delay(1000);
-
-                time--;
-                InvokeAsync(StateHasChanged);
-            }
-
-            await bootStrapModal.CloseModal();
-
-            _navmanager.NavigateTo("/signIn");
-
-
+            _navmanager.NavigateTo($"/VerifyUser/{userdto.UserEmail}");
 
         }
         catch (ApiException ex)
@@ -158,7 +155,7 @@
             {
                 dictionaryErrors = errors;
             }
-            else if(error is ExeptionDto exdto)
+            else if (error is ExeptionDto exdto)
             {
                 message = $"{exdto.Message}";
             }
@@ -187,3 +184,16 @@
 
 
 
+<style>
+    .white-textfield input {
+        color: white !important;
+    }
+
+    .white-textfield label {
+        color: rgba(89, 74, 226, 1) !important;
+    }
+
+    .white-textfield ::placeholder {
+        color: white !important;
+    }
+</style>
