@@ -286,6 +286,7 @@ public class UserServices : IUserServices
             new Claim(JwtRegisteredClaimNames.Name , user.UserName),
             new Claim(JwtRegisteredClaimNames.Email , user.UserEmail),
             new Claim(ClaimTypes.NameIdentifier , user.Id.ToString()),
+            new Claim(ClaimTypes.Role , user.RoleName),
             new Claim("UserId" , user.Id.ToString())
 
         };

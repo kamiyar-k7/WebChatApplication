@@ -33,7 +33,7 @@ public class ChatServices : IChatServices
             SenderId = message.SenderId,
             Timestamp = DateTime.Now,
             ConversationId = message.ConverstationId,
-           
+            IsSend = true
         };
 
         await _chatRepo.AddMessage(newmessage);
@@ -83,7 +83,7 @@ public class ChatServices : IChatServices
                 ResiverId = message.ResiverId,
                 ResiverName = message.Resiver.UserName,
                 SenderName = message.Sender.UserName,
-
+                IsSend = message.IsSend,
             };
 
             messagelist.Add(messageDto);
@@ -102,39 +102,41 @@ public class ChatServices : IChatServices
 
         if (ConDetailsList != null && ConDetailsList.Any())
         {
-            
+
 
             List<ConversationDto> cons = new List<ConversationDto>();
 
             foreach (var details in ConDetailsList)
             {
                 var otherUser = details.User1 ?? details.User2;
-                var otherUserId = otherUser?.Id ?? userId; 
+                var otherUserId = otherUser?.Id ?? userId;
                 var otherUserName = otherUser?.UserName ?? "Saved Messages";
 
 
                 ConversationDto condetails = new ConversationDto()
                 {
                     ConversationId = details.Id,
-                    LastMessage = details?.messages?.FirstOrDefault()?.Content,
+                    LastMessage = details?.messages?.FirstOrDefault()?.Content ?? string.Empty,
                     OtherUserId = otherUserId,
                     UserName = otherUserName,
-                    LastMessageTimestamp = details.messages.FirstOrDefault().Timestamp,
-                    
+                    LastMessageTimestamp = details.messages.FirstOrDefault()?.Timestamp ?? DateTime.UtcNow
+
+
+
 
                 };
                 cons.Add(condetails);
             };
 
 
-         return cons = cons.OrderByDescending(c => c.LastMessageTimestamp).ToList();
+            return cons = cons.OrderByDescending(c => c.LastMessageTimestamp).ToList();
         }
         else
         {
             return new List<ConversationDto>();
         }
     }
-    
+
     #endregion
 
 

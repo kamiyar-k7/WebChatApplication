@@ -46,6 +46,8 @@ public class ConverstationRepository : IConverstationRepository
             Content = x.Content,
             ConversationId = conid,
             Timestamp = x.Timestamp,
+            IsSend = x.IsSend ,
+            IsSeen = x.IsSeen,
             Sender = new User
             {
                 UserEmail = x.Sender.UserEmail,
@@ -65,7 +67,6 @@ public class ConverstationRepository : IConverstationRepository
                 RoleName = x.Sender.RoleName,
                 Id = x.Id,
             },
-
             ResiverId = x.ResiverId
 
 

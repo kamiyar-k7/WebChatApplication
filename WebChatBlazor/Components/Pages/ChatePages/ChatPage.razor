@@ -47,14 +47,25 @@
                 @if (message.SenderId == CurrntUserId)
                 {
                     <MudGrid Class="row d-flex m-1 flex-row-reverse p-1" Style=" padding-right:40px !important;">
-                        <MudItem xs="9" Style="height:auto;  border-top-right-radius:0px !important; " Class="d-flex flex-column text-end bg-primary rounded-5 m-1">
-                            <MudText Class="fw-bold text-white px-1 ">YOU</MudText>
-                            <MudDivider />
+                        <MudItem xs="9" Style="height:auto;  border-top-right-radius:0px !important; padding-top:1px !important;" Class="d-flex flex-column text-end bg-primary rounded-5 m-1">
+
                             <MudText Class="text-white p-2">
-                                <pre Style="white-space: pre-wrap; word-break: break-word; direction: @GetDirection(message.Content)">@message.Content</pre>
+                                <pre class="m-0" Style="white-space: pre-wrap; word-break: break-word; direction: @GetDirection(message.Content); font-size:large;">@message.Content</pre>
                             </MudText>
                             <MudDivider />
-                            <time Class="px-1 text-white">@string.Format("{0:dd/MM/yyyy HH:mm}", message.Timestamp) </time>
+
+                            <div Class="d-flex justify-content-end align-items-end">
+                                <!-- Icon aligned to the start -->
+                                <time Class="px-1 text-white">@string.Format("{0: HH:mm}", message.Timestamp)</time>
+
+
+                                <!-- Time aligned to the end -->
+                                <MudIcon Class="text-white p-1"
+                                         Icon="@((message.IsSend) ? Icons.Material.Filled.Check : Icons.Material.Filled.ScheduleSend)" />
+                            </div>
+
+
+
                         </MudItem>
                     </MudGrid>
                 }
@@ -63,16 +74,16 @@
                     <MudGrid Class="row d-flex m-1 py-0 px-1">
                         <MudItem xs="3" sm="1">
                             <MudImage Src="/Images/webicon.jpg" Alt="User Profile" ObjectFit="ObjectFit.Cover" Fluid="true"
-                            ObjectPosition="ObjectPosition.Center" Class="rounded-circle bg-transparent" />
+                                      ObjectPosition="ObjectPosition.Center" Class="rounded-circle bg-transparent" />
                         </MudItem>
                         <MudItem xs="8" sm="8" Style="height:auto; border-top-left-radius:0px !important; " Class="bg-secondary rounded-5 p-2 ">
                             <MudText Class="fw-bold text-white px-1">@message.ResiverName</MudText>
                             <MudDivider />
                             <MudText Class="text-white p-2">
-                                <pre Style="white-space: pre-wrap; word-break: break-word; direction: @GetDirection(message.Content)">@message.Content</pre>
+                                <pre class="m-0" Style="white-space: pre-wrap; word-break: break-word; direction: @GetDirection(message.Content);">@message.Content</pre>
                             </MudText>
                             <MudDivider />
-                            <time Class="px-1 text-white">@message.Timestamp</time>
+                            <time Class="px-1 text-white d-flex end-100">@string.Format("{0:dd/MM/yyyy HH:mm}", message.Timestamp) </time>
                         </MudItem>
                     </MudGrid>
                 }
@@ -97,50 +108,73 @@
 <MudAppBar Bottom="true" Fixed="true" Elevation="1" Style="height:100px;" Class="d-flex justify-content-center bg-dark">
     <EditForm Model="model" OnValidSubmit="SendMessage" Class=" d-flex align-items-center col-12" Style="height:auto;">
         <MudGrid Class=" d-flex align-items-center" Style="height:auto;">
-            <MudItem xs="10" Class="d-flex">
 
-                <MudTextField @bind-Value="@model.Content"
-                Placeholder="Type your message..."
-                Variant="Variant.Outlined"
-                Adornment="Adornment.None"
-                Class="w-100 white-text"
-                AutoGrow 
-                MaxLines="3"
-                Style="height: auto;" 
-                Required/>
 
-            </MudItem>
+            <MudItem xs="9" Class="d-flex">
 
-            <MudItem xs="2" Class="d-flex justify-content-center">
-
-                <MudButton ButtonType="ButtonType.Submit"
-                Variant="Variant.Filled"
-                Color="Color.Primary"
-                EndIcon="@Icons.Material.Filled.Send"
-                IconColor="Color.Info"
-                Class=" white-text w-100">
-                </MudButton>
-
+                <MudTextField Value="@model.Content"
+                              ValueChanged="@((string content) => Fillcontent(content) )"
+                              Immediate
+                              Placeholder="Type your message..."
+                              Variant="Variant.Outlined"
+                              Adornment="Adornment.None"
+                              Class="w-100 white-text"
+                              AutoGrow
+                              MaxLines="3"
+                              Style="height: auto;"
+                              Required />
 
             </MudItem>
+
+            @if (!string.IsNullOrEmpty(model.Content))
+            {
+                <MudItem xs="3" Class="d-flex justify-content-center">
+
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               EndIcon="@Icons.Material.Filled.Send"
+                               IconColor="Color.Info"
+                               Class=" white-text w-100">
+                    </MudButton>
+
+
+                </MudItem>
+            }
+            else
+            {
+                <MudItem xs="3" Class="d-flex justify-content-center">
+
+                    <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles" Class="p-1">
+                        <ActivatorContent>
+                            <MudFab Color="Color.Success"
+                                    StartIcon="@Icons.Material.Filled.AttachFile" />
+                        </ActivatorContent>
+                    </MudFileUpload>
+
+                </MudItem>
+            }
+
+
         </MudGrid>
     </EditForm>
 </MudAppBar>
 
 
-
 @code {
 
-    #region fields and methods 
+    #region fields
+
     [Parameter]
     public int id { get; set; }
     private List<MessageDto> ListOfMessages = new();
-    private MessageDto model = new MessageDto();
+    private MessageDto model = new();
     private OtherUserDto? otherUserDto { get; set; } = new OtherUserDto();
     private int conId = 0;
     private int CurrntUserId;
     private HubConnection? HubConnection;
     private bool _shouldScrollToBottom = false;
+
     #endregion
 
     protected override async Task OnInitializedAsync()
@@ -158,10 +192,15 @@
         // Get messages
         ListOfMessages = conId != 0 ? await _chatservice.GetListOfMessages(conId, id.ToString()) : new List<MessageDto>();
 
+        // var unsent = conId != 0 ? await _chatservice.GetUnsentMessages(conId) : new List<MessageDto>();
+
+        // ListOfMessages.AddRange(unsent);
+
         // Set up SignalR hub connection
         HubConnection = new HubConnectionBuilder()
             .WithUrl("https://localhost:7019/ChatHub")
             .WithAutomaticReconnect()
+            .WithStatefulReconnect()
             .Build();
 
         HubConnection.On<MessageDto>("ReceiveMessage", async message =>
@@ -175,35 +214,61 @@
         });
 
         await HubConnection.StartAsync();
+
         _shouldScrollToBottom = true;
     }
 
+
+    private void Fillcontent(string content)
+    {
+        model.Content = content;
+    }
+
+
+    #region  Files
+    IList<IBrowserFile> files = new List<IBrowserFile>();
+    private void UploadFiles(IReadOnlyList<IBrowserFile> files)
+    {
+        foreach (var file in files)
+        {
+            this.files.Add(file);
+        }
+        //TODO upload the files to the server
+    }
+
+    #endregion
+
+
     private async Task SendMessage()
     {
+        if (string.IsNullOrWhiteSpace(model.Content))
+        {
+            return;
+        }
+
         try
         {
-            if(model.Content == null || model.Content == "")
+
+            model.SenderId = CurrntUserId;
+            model.ResiverId = id;
+
+            if (conId == 0)
             {
-                StateHasChanged();
+                conId = await _chatservice.CreateConverstation(CurrntUserId, id);
             }
-            else
-            {
-                model.SenderId = CurrntUserId;
-                model.ResiverId = id;
-                if (conId == 0)
-                {
-                    conId = await _chatservice.CreateConverstation(CurrntUserId, id);
-                }
-                model.ConverstationId = conId;
+
+            model.ConverstationId = conId;
+            model.IsSend = false;
+            model.Timestamp = DateTime.Now;
+
+            // note : create background services
+
+            await HubConnection.SendAsync("SendMessage", model);
 
 
-                await HubConnection.SendAsync("SendMessage", model);
-                model.Content = string.Empty;
-
-                _shouldScrollToBottom = true;
-                StateHasChanged();
-            }
-         
+            _shouldScrollToBottom = true;
+            StateHasChanged();
+            model.Content = string.Empty;
         }
         catch (ApiException ex)
         {
@@ -211,7 +276,17 @@
         }
     }
 
-    #region scrool
+
+
+
+
+    // public async Task SaveUnsentMessages()
+    // {
+    //     var unsentMessages = ListOfMessages.Where(m => !m.IsSend).ToList();
+    //     await _chatservice.SaveUnsentMessages(conId, unsentMessages);
+    // }
+
+    #region scroll
     private ElementReference chatContainer;
 
     private async Task ScrollToBottom()
@@ -228,7 +303,6 @@
         }
     }
     #endregion
-
 
     private string GetDirection(string content)
     {

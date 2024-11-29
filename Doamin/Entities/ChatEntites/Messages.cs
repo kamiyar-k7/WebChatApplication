@@ -17,7 +17,9 @@ public class Messages
 
     public DateTime Timestamp { get; set; }
 
+    public bool IsSend { get; set; }
 
+    public bool IsSeen { get; set; }
     // seen
     // datetime seenDate
 

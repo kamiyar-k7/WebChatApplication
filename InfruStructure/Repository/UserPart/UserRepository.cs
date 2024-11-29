@@ -35,7 +35,9 @@ public class UserRepository : IUserRepository
             Id = x.Id,
             UserEmail = x.UserEmail,
             UserName = x.UserName,
-            CreatedAt = DateTime.Now,
+            CreatedAt = x.CreatedAt,
+            RoleName = x.RoleName,
+          
         }).FirstOrDefaultAsync();
 
     }

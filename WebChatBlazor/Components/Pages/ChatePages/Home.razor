@@ -36,7 +36,7 @@
                     <MudText Class="fw-bold h4 d-flex justify-content-start">@user.UserName</MudText>
                     <MudText Class="text-truncate mt-1 d-flex justify-content-start">@user.LastMessage</MudText>
                     <br />
-                    <p Class="px-1 text-white">@string.Format("{0:dd/MM/yyyy HH:mm}", user.LastMessageTimestamp) </p>
+                    <p Class="px-1 text-white d-flex">@string.Format("{0:dd/MM/yyyy HH:mm}", user.LastMessageTimestamp) </p>
 
                 </MudItem>
 
@@ -60,9 +60,8 @@
 
 
 
-
-
 @code {
+   
 
     List<ConversationDto?> model { get; set; } = new List<ConversationDto?>();
     private int CurrntUserId;

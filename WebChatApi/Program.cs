@@ -64,6 +64,11 @@ builder.Services.AddScoped<IValidator<object>, UserDtoValidator>();
 
 #endregion
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", b => b.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
+});
+
 
 #region JWT
 
@@ -81,10 +86,10 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ClockSkew = TimeSpan.Zero,
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-        ValidAudience = builder.Configuration["JwtSettings:Audiece"],
+        ValidAudience = builder.Configuration["JwtSettings:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
     };
-
+    
 });
 
 #endregion
@@ -109,9 +114,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
 app.UseHttpsRedirection();
 
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 

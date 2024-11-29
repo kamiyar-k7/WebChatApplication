@@ -15,6 +15,7 @@ public record MessageDto
     public string? ResiverName { get; set; }
     public string Content { get; set; }
     public DateTime? Timestamp { get; set; }
-
+    public bool IsSend { get; set; }
+    public bool IsSeen { get; set; }
 
 }

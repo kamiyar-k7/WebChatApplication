@@ -1,6 +1,7 @@
-﻿using Application.Serilizer;
-using Application.Services.Interfaces;
+﻿using Application.Services.Interfaces;
+using Application.Statics;
 using Application.ViewModel_And_Dto.Dto.UserSide;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -8,7 +9,7 @@ namespace WebChatApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-//[Authorize]
+[Authorize]
 public class ChatController : ControllerBase
 {
 
@@ -78,8 +79,6 @@ public class ChatController : ControllerBase
 
     }
 
-
-
     #region Coverstation
 
     [HttpGet("[Action]/{user2Id:int}")]
@@ -125,6 +124,7 @@ public class ChatController : ControllerBase
 
     [HttpGet("[Action]/{UserId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    
     public async Task<ActionResult<List<ConversationDto>>> GetUserConverstations(int UserId)
     {
         try
@@ -132,9 +132,7 @@ public class ChatController : ControllerBase
             var cons = await _chatservice.GetUserConversations(UserId);
             
                 return Ok(cons);
-         
-            
-           
+        
         }
         catch (Exception ex)
         {

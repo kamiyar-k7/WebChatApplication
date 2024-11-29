@@ -82,20 +82,19 @@
                            Class="mt-2 w-100 mb-3 white-text"
                            Style="height: 50px;"
                            Disabled="@(_currentCount > 0)">
-                            Resend Code In @_currentCount
+                    Resend Code In @_currentCount
                 </MudButton>
             }
             else
             {
-               
+
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Tertiary"
                            FullWidth="true"
                            Class="mt-2 w-100 mb-3 "
                            Style="height: 50px;"
-                           OnClick="ResendCode"
-                            >
-                            Resend Code
+                           OnClick="ResendCode">
+                    Resend Code
                 </MudButton>
             }
 
